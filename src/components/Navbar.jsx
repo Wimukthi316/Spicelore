@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { HiMenu, HiX } from 'react-icons/hi';
 import spicelogo from '../assets/spicelogo.png';
+import { Link } from 'react-router-dom';
+
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,9 +75,9 @@ const Navbar = () => {
                         <button className="w-1/2 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 rounded-full">
                             Sign In
                         </button>
-                        <button className="w-1/2 px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white rounded-full">
-                            Sign Up
-                        </button>
+                    <button className="px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full shadow">
+                       <Link to="register">Sign Up </Link> 
+                    </button>
                     </div>
                 </div>
             )}
