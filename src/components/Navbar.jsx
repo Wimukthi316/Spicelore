@@ -40,7 +40,7 @@ const Navbar = () => {
                         Sign In
                     </button>
                     <button className="px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full shadow">
-                        Sign Up
+                       <Link to="register">Sign Up </Link> 
                     </button>
                 </div>
 
