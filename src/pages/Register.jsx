@@ -64,10 +64,7 @@ const Registration = () => {
 
             <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
                 <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-                    <h2 className="text-3xl font-bold text-[#351108] mb-4 text-center">Your Journey Begins Here!</h2>
-                    <p className="text-gray-600 text-center mb-8">
-                        Create an account to manage your bookings, explore new destinations, and plan your perfect trip.
-                    </p>
+                    <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Create Your Account</h2>
 
                     <form onSubmit={handleSubmit}>
                         {/* Name Field */}
@@ -134,25 +131,6 @@ const Registration = () => {
                             Register
                         </button>
                     </form>
-
-                    {/* Divider */}
-                    <div className="flex items-center my-6">
-                        <div className="flex-1 border-t border-gray-300"></div>
-                        <span className="mx-4 text-gray-600">or</span>
-                        <div className="flex-1 border-t border-gray-300"></div>
-                    </div>
-
-                    {/* Social Login Buttons */}
-                    <div className="flex justify-center space-x-4">
-                        <button className="flex items-center justify-center px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
-                            <img src="/path/to/google-icon.png" alt="Google" className="w-6 h-6" />
-                            <span className="ml-2">Sign up with Google</span>
-                        </button>
-                        <button className="flex items-center justify-center px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all">
-                            <img src="/path/to/facebook-icon.png" alt="Facebook" className="w-6 h-6" />
-                            <span className="ml-2">Sign up with Facebook</span>
-                        </button>
-                    </div>
 
                     {/* Login Link */}
                     <p className="text-center mt-6">
