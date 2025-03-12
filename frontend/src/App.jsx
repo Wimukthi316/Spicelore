@@ -6,6 +6,7 @@ import ContactUs from './pages/user/ContactUs';
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
 import Shop from './pages/user/Shop';
+import Cart from './pages/user/Cart';
 
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </Router>
   );
