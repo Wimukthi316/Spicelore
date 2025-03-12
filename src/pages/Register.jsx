@@ -62,8 +62,8 @@ const Registration = () => {
         <>
             <Navbar />
 
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
-                <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+            <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/src/assets/registerbackground.jpg')" }}>
+                <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md" style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
                     <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Create Your Account</h2>
 
                     <form onSubmit={handleSubmit}>
