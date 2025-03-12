@@ -41,10 +41,10 @@ export const Footer = () => {
                 <motion.div variants={sectionVariants}>
                     <h3 className="text-lg sm:text-xl text-[#351108] font-bold">Navigation</h3>
                     <ul className="mt-4 space-y-2">
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Home</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">About Us</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Contact Us</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Shop</a></li>
+                        <li><a href="/" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Home</a></li>
+                        <li><a href="/about" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">About Us</a></li>
+                        <li><a href="/contact" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Contact Us</a></li>
+                        <li><a href="/shop" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Shop</a></li>
                     </ul>
                 </motion.div>
 
