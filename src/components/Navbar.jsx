@@ -15,7 +15,7 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="bg-white/90 backdrop-blur-md shadow-lg sticky top-4 z-50 rounded-3xl mx-6 px-6 py-3">
+        <nav className="bg-white/80 backdrop-blur-xs shadow-lg sticky top-4 z-50 rounded-3xl mx-6 px-6 py-3">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 {/* Logo */}
                 <div className="flex-shrink-0">
@@ -66,7 +66,7 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {isMenuOpen && (
-                <div className="md:hidden bg-white/90 backdrop-blur-md border-t rounded-3xl shadow-lg p-4 mt-2">
+                <div className="md:hidden bg-white/80 backdrop-blur-lg border-t rounded-3xl shadow-lg p-4 mt-2">
                     <div className="space-y-3">
                         {navLinks.map((link) => (
                             <a
