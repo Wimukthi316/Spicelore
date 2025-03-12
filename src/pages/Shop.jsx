@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { MdShoppingCart } from "react-icons/md"; 
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { MdShoppingCart } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ProductCard from "../components/ProductCard"; // Import ProductCard
 
 const Shop = () => {
-    const navigate = useNavigate(); // Initialize useNavigate
-
+    const navigate = useNavigate();
     const [products] = useState([
         { id: 1, name: "Turmeric Powder", price: 12.99, description: "Rich in flavor and health benefits.", image: "/src/assets/turmeric.jpg", category: "powder" },
         { id: 2, name: "Cloves", price: 8.99, description: "Aromatic and perfect for curries.", image: "/src/assets/cloves.jpg", category: "whole" },
@@ -33,7 +33,11 @@ const Shop = () => {
     }, []);
 
     const handleCartClick = () => {
-        navigate("/cart"); // Navigate to Shopping Cart page
+        navigate("/cart");
+    };
+
+    const handleAddToCart = (product) => {
+        console.log("Added to cart:", product);
     };
 
     const filteredProducts = products.filter((product) => {
@@ -45,19 +49,19 @@ const Shop = () => {
     return (
         <>
             <Navbar />
-
+            
             {showCartIcon && (
                 <div className="fixed right-4 bottom-4 md:right-8 md:bottom-8 z-50">
                     <div 
                         className="bg-white p-4 rounded-full shadow-2xl cursor-pointer hover:scale-110 transition-transform"
-                        onClick={handleCartClick} // Navigate to cart when clicked
+                        onClick={handleCartClick}
                     >
                         <MdShoppingCart className="h-10 w-10 text-[#351108]" />
                     </div>
                 </div>
             )}
 
-            <section className="relative h-[75vh] flex items-center justify-center bg-[url('/src/assets/shop.jpg')] bg-cover bg-center pt-24">
+            <section className="relative h-[60vh] flex items-center justify-center bg-[url('/src/assets/shop.jpg')] bg-cover bg-center pt-24">
                 <div className="absolute inset-0 bg-black opacity-50"></div>
                 <div className="relative text-center text-white px-4">
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Our Spice Collection</h1>
@@ -77,17 +81,7 @@ const Shop = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredProducts.map((product) => (
-                        <div key={product.id} className="bg-white shadow-2xl rounded-lg overflow-hidden transition-transform duration-300 hover:scale-105">
-                            <img src={product.image} alt={product.name} className="w-full h-48 object-cover" loading="lazy" />
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold text-[#351108] mb-2">{product.name}</h3>
-                                <p className="text-gray-600 mb-4">{product.description}</p>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-2xl font-bold text-[#351108]">${product.price}</span>
-                                    <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all" onClick={() => handleAddToCart(product)}>Add to Cart</button>
-                                </div>
-                            </div>
-                        </div>
+                        <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
                     ))}
                 </div>
 
@@ -104,10 +98,5 @@ const Shop = () => {
         </>
     );
 };
-
-const handleAddToCart = (product) => {
-    console.log("Added to cart:", product);
-};
-
 
 export default Shop;
