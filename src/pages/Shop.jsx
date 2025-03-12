@@ -57,11 +57,11 @@ const Shop = () => {
                 </div>
             )}
 
-            <section className="relative h-[40vh] flex items-center justify-center bg-[url('/src/assets/shop.jpg')] bg-cover bg-center">
+            <section className="relative h-[75vh] flex items-center justify-center bg-[url('/src/assets/shop.jpg')] bg-cover bg-center pt-24">
                 <div className="absolute inset-0 bg-black opacity-50"></div>
                 <div className="relative text-center text-white px-4">
                     <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Our Spice Collection</h1>
-                    <p className="text-lg sm:text-xl mb-8">Explore premium spices from around the world.</p>
+                    <p className="text-lg sm:text-xl mb-8">Explore Premium Spices From Around The World.</p>
                 </div>
             </section>
 
