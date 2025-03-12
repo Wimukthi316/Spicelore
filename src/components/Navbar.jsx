@@ -36,15 +36,25 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                {/* Desktop Buttons */}
-                <div className="hidden md:flex items-center space-x-6">
-                    <button className="px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 transition-all rounded-full shadow">
-                        <Link to ="login">Sign In</Link> 
-                    </button>
-                    <button className="px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full shadow">
-                       <Link to="register">Sign Up </Link> 
-                    </button>
+               {/* Desktop Buttons */}
+               <div className="hidden md:flex items-center space-x-6">
+                    <Link 
+                        to="/login" 
+                        className="w-32 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 transition-all rounded-full text-center flex justify-center"
+                    >
+                        Sign In
+                    </Link>
+
+                    <Link 
+                        to="/register" 
+                        className="w-32 px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full text-center flex justify-center"
+                    >
+                        Sign Up
+                    </Link>
                 </div>
+
+
+
 
                 {/* Mobile Menu Button */}
                 <div className="md:hidden">
@@ -73,10 +83,10 @@ const Navbar = () => {
                     </div>
                     <div className="pt-5 border-t flex space-x-4">
                         <button className="w-1/2 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 rounded-full">
-                           <Link to ="login">Sign In</Link> 
+                           <Link to ="/login">Sign In</Link> 
                         </button>
                     <button className="px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full shadow">
-                       <Link to="register">Sign Up </Link> 
+                       <Link to="/register">Sign Up </Link> 
                     </button>
                     </div>
                 </div>

@@ -48,9 +48,10 @@ const Login = () => {
         <>
             <Navbar />
 
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12">
+            <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/path/to/background.jpg')" }}>
                 <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-                    <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Login to Your Account</h2>
+                    <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Spice Up Your Journey!</h2>
+                    <p className="text-center text-gray-600 mb-8">Log in to explore our rich flavors and bring the taste of tradition to your kitchen.</p>
 
                     <form onSubmit={handleSubmit}>
                         {/* Email Field */}
@@ -90,11 +91,23 @@ const Login = () => {
                         </button>
                     </form>
 
+                    {/* Divider */}
+                    <div className="flex items-center my-6">
+                        <hr className="flex-grow border-gray-300" />
+                        <span className="px-4 text-gray-600">or Log in with</span>
+                        <hr className="flex-grow border-gray-300" />
+                    </div>
+
+                    {/* Google Login */}
+                    <button className="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-gray-100">
+                        <img src="/src/assets/Google.png" alt="Google Logo" className="w-11 h-6" />
+                    </button>
+
                     {/* Registration Link */}
                     <p className="text-center mt-6">
                         Don't have an account?{' '}
                         <Link to="/register" className="text-[#351108] hover:text-amber-900">
-                            Register here
+                            Sign in
                         </Link>
                     </p>
                 </div>
