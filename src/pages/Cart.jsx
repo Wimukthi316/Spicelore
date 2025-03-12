@@ -3,8 +3,12 @@ import { MdDelete } from "react-icons/md"; // Import delete icon
 import { FaCcVisa, FaCcMastercard } from "react-icons/fa"; // Import card icons
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useEffect } from "react";
 
 const Cart = () => {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     // Sample cart data (replace with your actual cart state)
     const [cartItems, setCartItems] = useState([
         {
@@ -178,7 +182,7 @@ const Cart = () => {
                                 {/* Quantity Controls */}
                                 <div className="flex items-center mt-4 sm:mt-0">
                                     <button
-                                        className="bg-gray-200 text-[#351108] px-3 py-1 rounded-lg hover:bg-gray-300 transition-all"
+                                        className="bg-gray-200 text-[#351108] px-3 py-1 rounded-lg hover:bg-gray-300 transition-all cursor-pointer"
                                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                                         disabled={item.quantity === 1}
                                     >
@@ -186,7 +190,7 @@ const Cart = () => {
                                     </button>
                                     <span className="mx-4 text-lg font-semibold">{item.quantity}</span>
                                     <button
-                                        className="bg-gray-200 text-[#351108] px-3 py-1 rounded-lg hover:bg-gray-300 transition-all"
+                                        className="bg-gray-200 text-[#351108] px-3 py-1 rounded-lg hover:bg-gray-300 transition-all cursor-pointer"
                                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                                     >
                                         +
@@ -195,7 +199,7 @@ const Cart = () => {
 
                                 {/* Remove Button */}
                                 <button
-                                    className="text-red-600 hover:text-red-800 mt-4 sm:mt-0 sm:ml-6"
+                                    className="text-red-900 hover:text-red-800 mt-4 sm:mt-0 sm:ml-6 cursor-pointer"
                                     onClick={() => handleRemoveItem(item.id)}
                                 >
                                     <MdDelete className="w-6 h-6" />
@@ -228,7 +232,7 @@ const Cart = () => {
 
                         {/* Checkout Button */}
                         <button
-                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all"
+                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all cursor-pointer"
                             onClick={() => setShowPaymentForm(true)}
                         >
                             Proceed to Checkout
