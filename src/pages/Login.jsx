@@ -48,7 +48,7 @@ const Login = () => {
         <>
             <Navbar />
 
-            <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/path/to/background.jpg')" }}>
+            <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/src/assets/loginbackground.jpg')" }}>
                 <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
                     <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Spice Up Your Journey!</h2>
                     <p className="text-center text-gray-600 mb-8">Log in to explore our rich flavors and bring the taste of tradition to your kitchen.</p>
