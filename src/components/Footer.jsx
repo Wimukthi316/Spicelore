@@ -1,63 +1,62 @@
-import { FaInstagram, FaPinterest, FaFacebook } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
-const footerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 1, staggerChildren: 0.2 } },
-};
-
-const sectionVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 1 } },
-};
-
-export const Footer = () => {
+const Footer = () => {
     return (
-        <motion.footer
-            className="bg-[#b7a69a] pt-12 sm:pt-20 pb-8 z-10 font-kulim"
-            variants={footerVariants}
-            initial="hidden"
-            whileInView="visible"
-        >
-            <div className="font-kulim max-w-screen-2xl mx-auto px-8 sm:px-6 md:px-12 lg:px-40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 lg:gap-x-40 gap-x-12">
-                {/* Left Section */}
-                <motion.div variants={sectionVariants}>
-                    <h1 className="text-2xl sm:text-3xl text-[#351108] font-bold hover:text-white">Spicelore</h1>
-                    <p className="text-sm sm:text-base text-[#351108] mt-2">Since 2020</p>
-                    <div className="flex space-x-4 sm:space-x-6 mt-6 sm:mt-8">
-                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" className="text-[#351108] hover:text-white transform hover:-translate-y-1 transition-transform duration-300">
-                            <FaInstagram size={20} />
-                        </a>
-                        <a href="https://www.pinterest.com" target="_blank" rel="noopener noreferrer" className="text-[#351108] hover:text-white transform hover:-translate-y-1 transition-transform duration-300">
-                            <FaPinterest size={20} />
-                        </a>
-                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="text-[#351108] hover:text-white transform hover:-translate-y-1 transition-transform duration-300">
-                            <FaFacebook size={20} />
-                        </a>
-                    </div>
-                </motion.div>
-
-                {/* Navigation Section */}
-                <motion.div variants={sectionVariants}>
-                    <h3 className="text-lg sm:text-xl text-[#351108] font-bold">Navigation</h3>
-                    <ul className="mt-4 space-y-2">
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Home</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">About Us</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Contact Us</a></li>
-                        <li><a href="#" className="text-sm sm:text-base text-[#351108] hover:text-white hover:underline font-bold">Shop</a></li>
-                    </ul>
-                </motion.div>
-
-                {/* Newsletter Section */}
-                <motion.div variants={sectionVariants}>
-                    <h3 className="text-lg sm:text-xl text-[#351108] font-bold">Subscribe to our newsletter</h3>
-                    <div className="flex flex-col mt-4">
-                        <input type="email" placeholder="Enter your email" className="p-2 text-sm sm:text-base w-full border border-[#1E1916] rounded-md mb-4" />
-                        <button className="p-2 bg-[#351108] text-white text-sm sm:text-base rounded-md">Subscribe</button>
-                    </div>
-                </motion.div>
+        <div className="text-center opacity-90 max-w-8xl mx-auto p-4 relative font-montserrat">
+            {/* Large Devion Text with Image Mask */}
+            <div className="relative mt-0.5">
+                <h1
+                    className="text-[10vw] font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-200"
+                    style={{
+                        backgroundImage: "url(/src/assets/loginbackground.jpg)",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
+                >
+                    Spicelore
+                </h1>
             </div>
-        </motion.footer>
+
+            {/* Subtitle */}
+            <p className="text-gray-600 mt-4 text-sm sm:text-base md:text-lg px-4 sm:px-8 md:px-12 max-w-4xl mx-auto">
+                Explore the World of Spices and Uncover Exotic Flavors. Let Spicelore Bring the Essence of Global Cuisines to Your Kitchen.
+            </p>
+
+            <div className="mt-8 px-6 sm:px-10 flex flex-col sm:flex-row justify-between items-center text-center sm:text-left">
+                {/* Social Media Icons */}
+                <div className="w-full sm:w-1/2 flex justify-center sm:justify-start items-center gap-6">
+                    <a href="#" className="text-[#351108] hover:text-gray-800"><FaFacebookF size={20} /></a>
+                    <a href="#" className="text-[#351108] hover:text-gray-800"><FaInstagram size={20} /></a>
+                    <a href="#" className="text-[#351108] hover:text-gray-800"><FaTwitter size={20} /></a>
+                    <a href="#" className="text-[#351108] hover:text-gray-800"><FaLinkedinIn size={20} /></a>
+                </div>
+
+                {/* Right Section (Button & Text) */}
+                <div className="w-full sm:w-1/2 flex flex-col sm:flex-row sm:justify-end items-center gap-4 sm:gap-12 mt-4 sm:mt-0">
+                    <h3 className="text-black text-lg sm:text-xl font-semibold text-center sm:text-left">
+                        Elevate Your Culinary Creations <br /> with Spices That Inspire <span className="text-gray-500">Every Dish</span>
+                    </h3>
+                    <Link to="/contact">
+                        <button className="bg-[#351108] text-white px-4 sm:px-6 py-2 sm:py-2 rounded-full text-sm sm:text-base font-base hover:bg-gray-800 cursor-pointer whitespace-nowrap">
+                            Contact Us
+                        </button>
+                    </Link>
+                </div>
+            </div>
+
+            <div className="mt-8 border-t border-gray-400 px-6 sm:px-10 pt-4 text-gray-600 text-xs sm:text-sm flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+                <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                    <Link to="/" className="text-black">Home</Link>
+                    <Link to="/about" className="text-black">About Us</Link>
+                    <Link to="/contact" className="text-black">Contact Us</Link>
+                    <Link to="/shop" className="text-black">Shop</Link>
+                </div>
+                <p className="text-[black] text-center sm:text-left">
+                    © 2025 Spicelore. All Rights Reserved Wimukthi Gunarathna.
+                </p>
+            </div>
+        </div>
     );
 };
 
