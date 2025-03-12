@@ -25,7 +25,7 @@ const sampleProducts = [
         name: "Black Pepper",
         description: "Premium black pepper with strong aroma.",
         price: 8.99,
-        image: "/src/assets/black_pepper.jpg",
+        image: "/src/assets/blackpepper.jpg",
     },
 ];
 
