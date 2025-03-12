@@ -16,6 +16,14 @@ const Registration = () => {
     // Handle form input change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+
+        if (name === "name") {
+            // Allow only letters and spaces
+            if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+        }
+
         setFormData({ ...formData, [name]: value });
     };
 
