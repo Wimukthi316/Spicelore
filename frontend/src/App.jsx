@@ -5,6 +5,7 @@ import AboutUs from './pages/user/AboutUs';
 import ContactUs from './pages/user/ContactUs';
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
+import Shop from './pages/user/Shop';
 
 
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/shop" element={<Shop />} />
       </Routes>
     </Router>
   );
