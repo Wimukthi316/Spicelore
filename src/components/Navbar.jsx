@@ -23,7 +23,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex text-lg font-medium items-center space-x-12">
+                <div className="hidden md:flex text-lg font-medium items-center space-x-8 lg:space-x-12">
                     {navLinks.map((link) => (
                         <a
                             key={link.name}
@@ -37,24 +37,21 @@ const Navbar = () => {
                 </div>
 
                {/* Desktop Buttons */}
-               <div className="hidden md:flex items-center space-x-6">
+               <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
                     <Link 
                         to="/login" 
-                        className="w-32 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 transition-all rounded-full text-center flex justify-center"
+                        className="w-28 lg:w-32 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 transition-all rounded-full text-center flex justify-center"
                     >
                         Sign In
                     </Link>
 
                     <Link 
                         to="/register" 
-                        className="w-32 px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full text-center flex justify-center"
+                        className="w-28 lg:w-32 px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full text-center flex justify-center"
                     >
                         Sign Up
                     </Link>
                 </div>
-
-
-
 
                 {/* Mobile Menu Button */}
                 <div className="md:hidden">
@@ -82,12 +79,8 @@ const Navbar = () => {
                         ))}
                     </div>
                     <div className="pt-5 border-t flex space-x-4">
-                        <button className="w-1/2 px-5 py-2 text-white bg-[#351108] hover:bg-amber-900 rounded-full">
-                           <Link to ="/login">Sign In</Link> 
-                        </button>
-                    <button className="px-5 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white transition-all rounded-full shadow">
-                       <Link to="/register">Sign Up </Link> 
-                    </button>
+                        <Link to="/login" className="flex-1 px-4 py-2 text-white bg-[#351108] hover:bg-amber-900 rounded-full text-center text-sm">Sign In</Link>
+                        <Link to="/register" className="flex-1 px-4 py-2 text-[#351108] border border-[#351108] hover:bg-[#351108] hover:text-white rounded-full text-center text-sm">Sign Up</Link>
                     </div>
                 </div>
             )}
