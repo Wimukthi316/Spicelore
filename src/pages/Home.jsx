@@ -22,7 +22,7 @@ const Home = () => {
                     </p>
                     <button
                         onClick={() => navigate("/shop")} // Navigate to the Shop page
-                        className="flex justify-center gap-2 items-center mx-auto shadow-xl text-lg backdrop-blur-md lg:font-semibold isolation-auto border-gray-50 before:absolute before:w-full before:transition-all before:duration-700 before:hover:w-full before:-left-full before:hover:left-0 before:rounded-full before:bg-emerald-500 hover:text-gray-50 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700 relative z-10 px-4 py-2 overflow-hidden border-2 rounded-full group"
+                        className="flex justify-center gap-2 items-center mx-auto shadow-xl text-lg backdrop-blur-md lg:font-semibold isolation-auto border-gray-50 before:absolute before:w-full before:transition-all before:duration-700 before:hover:w-full before:-left-full before:hover:left-0 before:rounded-full before:bg-emerald-500 hover:text-gray-50 before:-z-10 before:aspect-square before:hover:scale-150 before:hover:duration-700 relative z-10 px-4 py-2 overflow-hidden border-2 rounded-full group cursor-pointer"
                     >
                         Shop Now
                         <svg
@@ -58,7 +58,7 @@ const Home = () => {
                                 <p className="text-gray-600 mb-4">
                                     Rich in flavor and health benefits.
                                 </p>
-                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all">
+                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all cursor-pointer">
                                     Add to Cart
                                 </button>
                             </div>
@@ -76,7 +76,7 @@ const Home = () => {
                                 <p className="text-gray-600 mb-4">
                                     Aromatic and perfect for curries.
                                 </p>
-                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all">
+                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all cursor-pointer">
                                     Add to Cart
                                 </button>
                             </div>
@@ -94,7 +94,7 @@ const Home = () => {
                                 <p className="text-gray-600 mb-4">
                                     Sweet and spicy, ideal for desserts.
                                 </p>
-                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all">
+                                <button className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all cursor-pointer">
                                     Add to Cart
                                 </button>
                             </div>
