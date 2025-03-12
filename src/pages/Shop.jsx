@@ -109,4 +109,5 @@ const handleAddToCart = (product) => {
     console.log("Added to cart:", product);
 };
 
+
 export default Shop;
