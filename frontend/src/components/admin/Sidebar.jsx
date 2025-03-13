@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { FaBox, FaShoppingCart, FaUsers, FaUser, FaChartLine, FaTimes, FaSignOutAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { FaBox, FaShoppingCart, FaUsers, FaUser, FaChartLine, FaTimes, FaSignOutAlt, FaBoxOpen } from "react-icons/fa";
 
 const Sidebar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const location = useLocation(); // Get the current route
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
+
+    // Function to determine if the link is active
+    const isActive = (path) =>
+        location.pathname === path ? "bg-white text-black font-bold" : "text-black";
 
     return (
         <>
@@ -34,14 +39,14 @@ const Sidebar = () => {
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 w-64 bg-[#7e5f57] text-white transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 z-40 flex flex-col`}
+                className={`fixed inset-y-0 left-0 w-64 bg-[#8f8988] transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 z-40 flex flex-col`}
             >
                 {/* Sidebar Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-700">
-                    <h1 className="text-2xl font-bold ml-8">Dashboard</h1>
+                <div className="flex items-center justify-between p-6">
+                    <h1 className="text-2xl font-bold ml-8 text-black">Dashboard</h1>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-gray-400 hover:text-white"
+                        className="lg:hidden text-gray-400 hover:text-black"
                     >
                         <FaTimes className="w-6 h-6" />
                     </button>
@@ -52,41 +57,47 @@ const Sidebar = () => {
                     <div className="flex-grow">
                         <ul className="space-y-6">
                             <li>
-                                <Link to="/admin/users" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaUser className="w-5 h-5 mr-3 text-white" /> 
+                                <Link to="/admin/users" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/users")}`}>
+                                    <FaUser className={`w-5 h-5 mr-3 ${isActive("/admin/users")}`} />
                                     <span>User Management</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/admin/employee" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaUsers className="w-5 h-5 mr-3" />
+                                <Link to="/admin/employee" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/employee")}`}>
+                                    <FaUsers className={`w-5 h-5 mr-3 ${isActive("/admin/employee")}`} />
                                     <span>Employee Management</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/admin/products" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaBox className="w-5 h-5 mr-3" />
+                                <Link to="/admin/products" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/products")}`}>
+                                    <FaBox className={`w-5 h-5 mr-3 ${isActive("/admin/products")}`} />
                                     <span>Product Management</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/admin/orders" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaShoppingCart className="w-5 h-5 mr-3" />
+                                <Link to="/admin/orders" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/orders")}`}>
+                                    <FaShoppingCart className={`w-5 h-5 mr-3 ${isActive("/admin/orders")}`} />
                                     <span>Order Management</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/admin/sales" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaChartLine className="w-5 h-5 mr-3" />
+                                <Link to="/admin/inventory" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/inventory")}`}>
+                                    <FaBoxOpen className={`w-5 h-5 mr-3 ${isActive("/admin/inventory")}`} />
+                                    <span>Inventory Management</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/admin/sales" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/sales")}`}>
+                                    <FaChartLine className={`w-5 h-5 mr-3 ${isActive("/admin/sales")}`} />
                                     <span>Sales Management</span>
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
-                    {/* Log Out Section (Fixed at Bottom) */}
+                    {/* Log Out Section */}
                     <div className="p-2">
-                        <Link to="/logout" className="flex items-center p-2 rounded-lg hover:bg-gray-700 transition-all">
+                        <Link to="/logout" className="flex items-center p-2 rounded-lg hover:bg-white hover:text-black transition-all text-black">
                             <FaSignOutAlt className="w-5 h-5 mr-3" />
                             <span>Log Out</span>
                         </Link>
