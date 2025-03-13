@@ -7,7 +7,7 @@ import Login from './pages/user/Login';
 import Register from './pages/user/Register';
 import Shop from './pages/user/Shop';
 import Cart from './pages/user/Cart';
-
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const App = () => {
   return (
@@ -20,6 +20,8 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        
       </Routes>
     </Router>
   );
