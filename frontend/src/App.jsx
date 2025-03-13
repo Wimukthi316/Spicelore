@@ -12,6 +12,7 @@ import UserManagement from './pages/admin/UserManagement';
 import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import EmployeeManagement from './pages/admin/EmployeeManagement';
+import InventoryManagement from './pages/admin/InventoryManagement';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/admin/products" element={<ProductManagement />} />
         <Route path="/admin/orders" element={<OrderManagement />} />
         <Route path="/admin/employee" element={<EmployeeManagement />} />
+        <Route path="/admin/inventory" element={<InventoryManagement />} />
                
       </Routes>
     </Router>
