@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaBox, FaShoppingCart, FaUsers, FaChartLine, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { FaBox, FaShoppingCart, FaUsers, FaUser, FaChartLine, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
@@ -53,8 +53,14 @@ const Sidebar = () => {
                         <ul className="space-y-6">
                             <li>
                                 <Link to="/admin/users" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
-                                    <FaUsers className="w-5 h-5 mr-3" />
+                                    <FaUser className="w-5 h-5 mr-3 text-white" /> 
                                     <span>User Management</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/admin/employee" className="flex items-center p-3 rounded-lg hover:bg-gray-700 transition-all">
+                                    <FaUsers className="w-5 h-5 mr-3" />
+                                    <span>Employee Management</span>
                                 </Link>
                             </li>
                             <li>
