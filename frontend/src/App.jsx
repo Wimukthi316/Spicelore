@@ -8,6 +8,7 @@ import Register from './pages/user/Register';
 import Shop from './pages/user/Shop';
 import Cart from './pages/user/Cart';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement';
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/shop" element={<Shop />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/users" element={<UserManagement />} />
         
       </Routes>
     </Router>
