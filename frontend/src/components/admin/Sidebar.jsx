@@ -43,7 +43,12 @@ const Sidebar = () => {
             >
                 {/* Sidebar Header */}
                 <div className="flex items-center justify-between p-6">
-                    <h1 className="text-2xl font-bold ml-8 text-black">Dashboard</h1>
+                    {/* Make the Dashboard heading clickable */}
+                    <Link to="/admin">
+                        <h1 className="text-2xl font-bold ml-8 text-black hover:text-gray-700 transition-all">
+                            Dashboard
+                        </h1>
+                    </Link>
                     <button
                         onClick={toggleSidebar}
                         className="lg:hidden text-gray-400 hover:text-black"

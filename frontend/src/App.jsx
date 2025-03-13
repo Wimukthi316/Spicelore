@@ -13,6 +13,7 @@ import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import EmployeeManagement from './pages/admin/EmployeeManagement';
 import InventoryManagement from './pages/admin/InventoryManagement';
+import SalesManagement from './pages/admin/SalesManagement';
 
 const App = () => {
   return (
@@ -31,7 +32,9 @@ const App = () => {
         <Route path="/admin/orders" element={<OrderManagement />} />
         <Route path="/admin/employee" element={<EmployeeManagement />} />
         <Route path="/admin/inventory" element={<InventoryManagement />} />
-               
+        <Route path="/admin/sales" element={<SalesManagement />}/>
+
+
       </Routes>
     </Router>
   );
