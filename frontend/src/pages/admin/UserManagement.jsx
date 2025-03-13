@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaUserPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaUsers } from "react-icons/fa";
+import { FaUserPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaUsers, FaSearch } from "react-icons/fa";
 import Sidebar from "../../components/admin/Sidebar";
 import Topbar from "../../components/admin/Topbar";
 
@@ -15,6 +15,7 @@ const UserManagement = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [newUser, setNewUser] = useState({ name: "", email: "", role: "", status: "" });
+    const [searchQuery, setSearchQuery] = useState(""); // State for search query
 
     // Validation errors
     const [errors, setErrors] = useState({});
@@ -110,6 +111,16 @@ const UserManagement = () => {
         setUsers(users.filter((user) => user.id !== id));
     };
 
+    // Filter users based on search query
+    const filteredUsers = users.filter((user) => {
+        const matchesSearch =
+            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.status.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesSearch;
+    });
+
     return (
         <div className="min-h-screen bg-white">
             {/* Sidebar */}
@@ -132,6 +143,20 @@ const UserManagement = () => {
                             <FaUserPlus className="w-5 h-5" />
                             <span>Add User</span>
                         </button>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="mb-8">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-[#745249]"
+                            />
+                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        </div>
                     </div>
 
                     {/* Statistical Cards */}
@@ -189,7 +214,7 @@ const UserManagement = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-300">
-                                {users.map((user) => (
+                                {filteredUsers.map((user) => (
                                     <tr key={user.id} className="transition-all">
                                         <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.name}</td>
                                         <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.email}</td>
