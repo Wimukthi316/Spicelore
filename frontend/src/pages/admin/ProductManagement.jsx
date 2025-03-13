@@ -6,15 +6,15 @@ import Topbar from "../../components/admin/Topbar";
 const ProductManagement = () => {
     // Dummy data for demonstration
     const [products, setProducts] = useState([
-        { id: 1, name: "Laptop", category: "Electronics", price: 1200, stock: 15, description: "High-performance laptop." },
-        { id: 2, name: "Smartphone", category: "Electronics", price: 800, stock: 30, description: "Latest smartphone model." },
-        { id: 3, name: "Headphones", category: "Accessories", price: 150, stock: 50, description: "Noise-cancelling headphones." },
+        { id: 1, name: "Laptop", price: 1200, description: "High-performance laptop.", image: "https://via.placeholder.com/150" },
+        { id: 2, name: "Smartphone", price: 800, description: "Latest smartphone model.", image: "https://via.placeholder.com/150" },
+        { id: 3, name: "Headphones", price: 150, description: "Noise-cancelling headphones.", image: "https://via.placeholder.com/150" },
     ]);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [newProduct, setNewProduct] = useState({ name: "", category: "", price: "", stock: "", description: "" });
+    const [newProduct, setNewProduct] = useState({ name: "", price: "", description: "", image: "" });
 
     // Validation errors
     const [errors, setErrors] = useState({});
@@ -28,7 +28,7 @@ const ProductManagement = () => {
     // Close Add Product Modal
     const closeAddModal = () => {
         setIsAddModalOpen(false);
-        setNewProduct({ name: "", category: "", price: "", stock: "", description: "" });
+        setNewProduct({ name: "", price: "", description: "", image: "" });
         setErrors({}); // Clear errors when closing the modal
     };
 
@@ -53,17 +53,14 @@ const ProductManagement = () => {
         if (!product.name.trim()) {
             errors.name = "Name is required.";
         }
-        if (!product.category.trim()) {
-            errors.category = "Category is required.";
-        }
         if (!product.price || isNaN(product.price) || product.price <= 0) {
             errors.price = "Price must be a positive number.";
         }
-        if (!product.stock || isNaN(product.stock) || product.stock < 0) {
-            errors.stock = "Stock must be a non-negative number.";
-        }
         if (!product.description.trim()) {
             errors.description = "Description is required.";
+        }
+        if (!product.image) {
+            errors.image = "Image is required.";
         }
 
         return errors;
@@ -98,6 +95,40 @@ const ProductManagement = () => {
         setProducts(products.filter((product) => product.id !== id));
     };
 
+    // Block invalid characters in the Name field
+    const handleNameKeyDown = (e) => {
+        const key = e.key;
+        // Allow letters, spaces, and backspace
+        if (!/[A-Za-z\s]/.test(key) && key !== "Backspace") {
+            e.preventDefault();
+        }
+    };
+
+    // Block non-numeric characters in the Price field
+    const handlePriceKeyDown = (e) => {
+        const key = e.key;
+        // Allow numbers, backspace, and decimal point
+        if (!/[0-9.]/.test(key) && key !== "Backspace") {
+            e.preventDefault();
+        }
+    };
+
+    // Handle image upload
+    const handleImageUpload = (e, isEdit = false) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (isEdit) {
+                    setSelectedProduct({ ...selectedProduct, image: reader.result });
+                } else {
+                    setNewProduct({ ...newProduct, image: reader.result });
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white">
             {/* Sidebar */}
@@ -128,9 +159,8 @@ const ProductManagement = () => {
                             <thead className="bg-white">
                                 <tr>
                                     <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Category</th>
                                     <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Price</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Stock</th>
+                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Image</th>
                                     <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
                                 </tr>
                             </thead>
@@ -138,9 +168,10 @@ const ProductManagement = () => {
                                 {products.map((product) => (
                                     <tr key={product.id} className="transition-all">
                                         <td className="px-4 sm:px-6 py-4 text-sm text-black">{product.name}</td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">{product.category}</td>
                                         <td className="px-4 sm:px-6 py-4 text-sm text-black">${product.price}</td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">{product.stock}</td>
+                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">
+                                            <img src={product.image} alt={product.name} className="w-10 h-10 rounded-full object-cover" />
+                                        </td>
                                         <td className="px-4 sm:px-6 py-4 text-sm text-white">
                                             <div className="flex space-x-4">
                                                 <button
@@ -180,25 +211,11 @@ const ProductManagement = () => {
                                         placeholder="Product Name"
                                         value={newProduct.name}
                                         onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                                        onKeyDown={handleNameKeyDown} // Block invalid characters
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
                                     />
                                     {errors.name && (
                                         <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                                    )}
-                                </div>
-
-                                {/* Category Field */}
-                                <div>
-                                    <label className="block text-gray-700 mb-2">Category</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Category"
-                                        value={newProduct.category}
-                                        onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
-                                    />
-                                    {errors.category && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.category}</p>
                                     )}
                                 </div>
 
@@ -210,6 +227,7 @@ const ProductManagement = () => {
                                         placeholder="Price"
                                         value={newProduct.price}
                                         onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                                        onKeyDown={handlePriceKeyDown} // Block non-numeric characters
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
                                     />
                                     {errors.price && (
@@ -217,18 +235,20 @@ const ProductManagement = () => {
                                     )}
                                 </div>
 
-                                {/* Stock Field */}
+                                {/* Image Field */}
                                 <div>
-                                    <label className="block text-gray-700 mb-2">Stock</label>
+                                    <label className="block text-gray-700 mb-2">Image</label>
                                     <input
-                                        type="number"
-                                        placeholder="Stock"
-                                        value={newProduct.stock}
-                                        onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, false)} // Handle image upload
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
                                     />
-                                    {errors.stock && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.stock}</p>
+                                    {errors.image && (
+                                        <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                                    )}
+                                    {newProduct.image && (
+                                        <img src={newProduct.image} alt="Preview" className="w-20 h-20 mt-2 rounded-lg object-cover" />
                                     )}
                                 </div>
 
@@ -285,25 +305,11 @@ const ProductManagement = () => {
                                         placeholder="Product Name"
                                         value={selectedProduct.name}
                                         onChange={(e) => setSelectedProduct({ ...selectedProduct, name: e.target.value })}
+                                        onKeyDown={handleNameKeyDown} // Block invalid characters
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#745249]"
                                     />
                                     {errors.name && (
                                         <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                                    )}
-                                </div>
-
-                                {/* Category Field */}
-                                <div>
-                                    <label className="block text-gray-700 mb-2">Category</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Category"
-                                        value={selectedProduct.category}
-                                        onChange={(e) => setSelectedProduct({ ...selectedProduct, category: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#745249]"
-                                    />
-                                    {errors.category && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.category}</p>
                                     )}
                                 </div>
 
@@ -315,6 +321,7 @@ const ProductManagement = () => {
                                         placeholder="Price"
                                         value={selectedProduct.price}
                                         onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
+                                        onKeyDown={handlePriceKeyDown} // Block non-numeric characters
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#745249]"
                                     />
                                     {errors.price && (
@@ -322,18 +329,20 @@ const ProductManagement = () => {
                                     )}
                                 </div>
 
-                                {/* Stock Field */}
+                                {/* Image Field */}
                                 <div>
-                                    <label className="block text-gray-700 mb-2">Stock</label>
+                                    <label className="block text-gray-700 mb-2">Image</label>
                                     <input
-                                        type="number"
-                                        placeholder="Stock"
-                                        value={selectedProduct.stock}
-                                        onChange={(e) => setSelectedProduct({ ...selectedProduct, stock: e.target.value })}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, true)} // Handle image upload
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#745249]"
                                     />
-                                    {errors.stock && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.stock}</p>
+                                    {errors.image && (
+                                        <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                                    )}
+                                    {selectedProduct.image && (
+                                        <img src={selectedProduct.image} alt="Preview" className="w-20 h-20 mt-2 rounded-lg object-cover" />
                                     )}
                                 </div>
 
