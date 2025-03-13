@@ -11,6 +11,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import ProductManagement from './pages/admin/ProductManagement';
 import OrderManagement from './pages/admin/OrderManagement';
+import EmployeeManagement from './pages/admin/EmployeeManagement';
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/products" element={<ProductManagement />} />
         <Route path="/admin/orders" element={<OrderManagement />} />
+        <Route path="/admin/employee" element={<EmployeeManagement />} />
                
       </Routes>
     </Router>
