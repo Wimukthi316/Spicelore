@@ -9,11 +9,11 @@ This document describes the Cloudinary integration setup for the Spicelore spice
 Add the following variables to your `.env` file:
 
 ```env
-# Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=dzncoloro
-CLOUDINARY_API_KEY=889225549224889
-CLOUDINARY_API_SECRET=dL7zTjMY39KNWdM3g8YfqYE0h0A
-CLOUDINARY_URL=cloudinary://889225549224889:dL7zTjMY39KNWdM3g8YfqYE0h0A@dzncoloro
+# Cloudinary Configuration (Get these from https://cloudinary.com/console)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_URL=cloudinary://your_api_key:your_api_secret@your_cloud_name
 ```
 
 ### 2. Dependencies

@@ -83,7 +83,7 @@ const Navbar = () => {
                                 className="flex items-center space-x-3 px-4 py-2 text-[#351108] hover:bg-amber-50 rounded-lg transition-all duration-200 border border-transparent hover:border-amber-200"
                             >
                                 <img
-                                    src={user.avatar ? `http://localhost:5000/uploads/avatars/${user.avatar}` : '/default-avatar.svg'}
+                                    src={user.avatar && user.avatar !== 'default-avatar.png' ? user.avatar : '/default-avatar.svg'}
                                     alt="Profile"
                                     className="w-8 h-8 rounded-full object-cover border-2 border-amber-200"
                                 />
@@ -103,7 +103,7 @@ const Navbar = () => {
                                     <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
                                         <div className="flex items-center space-x-3">
                                             <img
-                                                src={user.avatar ? `http://localhost:5000/uploads/avatars/${user.avatar}` : '/default-avatar.svg'}
+                                                src={user.avatar && user.avatar !== 'default-avatar.png' ? user.avatar : '/default-avatar.svg'}
                                                 alt="Profile"
                                                 className="w-10 h-10 rounded-full object-cover border-2 border-amber-200"
                                             />
@@ -183,7 +183,7 @@ const Navbar = () => {
                             <div className="bg-amber-50 rounded-lg p-4 mb-3 border border-amber-200">
                                 <div className="flex items-center space-x-3">
                                     <img
-                                        src={user.avatar ? `http://localhost:5000/uploads/avatars/${user.avatar}` : '/default-avatar.svg'}
+                                        src={user.avatar && user.avatar !== 'default-avatar.png' ? user.avatar : '/default-avatar.svg'}
                                         alt="Profile"
                                         className="w-12 h-12 rounded-full object-cover border-2 border-amber-300"
                                     />
