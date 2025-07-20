@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
+import authService from '../../services/authService';
 
 const Registration = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -12,6 +14,7 @@ const Registration = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     // Handle form input change
     const handleInputChange = (e) => {
@@ -58,11 +61,31 @@ const Registration = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            alert('Registration successful!');
-            setFormData({ name: '', email: '', password: '', confirmPassword: '' }); // Clear form
+            setIsLoading(true);
+            setErrors({});
+
+            try {
+                const result = await authService.register({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                });
+                
+                if (result.success) {
+                    // Registration successful, redirect to login
+                    navigate('/login');
+                } else {
+                    setErrors({ general: result.message });
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                setErrors({ general: 'Registration failed. Please try again.' });
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -73,6 +96,13 @@ const Registration = () => {
             <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/src/assets/Registerbackground.jpg')" }}>
                 <div className="bg-white/50 backdrop-blur-xs p-8 rounded-2xl shadow-lg w-full max-w-md" style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
                     <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Create Your Account</h2>
+
+                    {/* General Error Message */}
+                    {errors.general && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                            {errors.general}
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit}>
                         {/* Name Field */}
@@ -134,9 +164,10 @@ const Registration = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all"
+                            disabled={isLoading}
+                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Register
+                            {isLoading ? 'Creating Account...' : 'Register'}
                         </button>
                     </form>
 

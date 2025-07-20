@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
+import authService from '../../services/authService';
 
 const Login = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
 
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     // Handle form input change
     const handleInputChange = (e) => {
@@ -36,11 +39,27 @@ const Login = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            alert('Login successful!');
-            setFormData({ email: '', password: '' }); // Clear form
+            setIsLoading(true);
+            setErrors({});
+
+            try {
+                const result = await authService.login(formData.email, formData.password);
+                
+                if (result.success) {
+                    // Redirect to home page
+                    navigate('/');
+                } else {
+                    setErrors({ general: result.message });
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                setErrors({ general: 'Login failed. Please try again.' });
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -53,6 +72,13 @@ const Login = () => {
                 <div className="bg-white/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full max-w-md">
                     <h2 className="text-4xl font-bold text-[#351108] mb-6 text-center">Spice Up Your Journey!</h2>
                     <p className="text-center text-gray-700 mb-8">Log in to explore our rich flavors and bring the taste of tradition to your kitchen.</p>
+
+                    {/* General Error Message */}
+                    {errors.general && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                            {errors.general}
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit}>
                         {/* Email Field */}
@@ -86,9 +112,10 @@ const Login = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all"
+                            disabled={isLoading}
+                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Login
+                            {isLoading ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
 
@@ -108,7 +135,7 @@ const Login = () => {
                     <p className="text-center mt-6 text-gray-700">
                         Don't have an account?{' '}
                         <Link to="/register" className="text-[#351108] hover:text-amber-900">
-                            Sign in
+                            Sign up
                         </Link>
                     </p>
                 </div>
