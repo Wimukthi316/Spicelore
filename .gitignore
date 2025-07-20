@@ -26,6 +26,7 @@ dist-ssr
 cloudinary.js
 secrets.json
 keys.json
+CLOUDINARY_SETUP.md
 
 # Database
 *.db
