@@ -6,7 +6,8 @@ const {
   updateOrder,
   deleteOrder,
   getOrderStats,
-  updateOrderStatus
+  updateOrderStatus,
+  getUserOrders
 } = require('../controllers/orderController');
 
 const { protect, authorize, optionalAuth } = require('../middleware/auth');
@@ -19,7 +20,10 @@ router.post('/', optionalAuth, createOrder);
 // Protected routes
 router.use(protect);
 
-// User can view their own orders (you might want to add user-specific filtering later)
+// User can view their own orders
+router.get('/my-orders', getUserOrders);
+
+// User can view their own order details
 router.get('/:id', getOrder);
 
 // Admin only routes

@@ -72,6 +72,62 @@ exports.getOrders = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Get user's orders
+// @route   GET /api/orders/my-orders
+// @access  User
+exports.getUserOrders = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const startIndex = (page - 1) * limit;
+
+  let query = { customer: req.user._id };
+
+  // Filter by status if provided
+  if (req.query.status && req.query.status !== 'All') {
+    query.status = req.query.status;
+  }
+
+  // Search by order number or product name
+  if (req.query.search) {
+    query.$or = [
+      { orderNumber: { $regex: req.query.search, $options: 'i' } },
+      { 'items.productName': { $regex: req.query.search, $options: 'i' } }
+    ];
+  }
+
+  const total = await Order.countDocuments(query);
+  const orders = await Order.find(query)
+    .populate('items.product', 'name images price')
+    .sort({ date: -1 })
+    .limit(limit)
+    .skip(startIndex);
+
+  // Pagination result
+  const pagination = {};
+
+  if (startIndex + limit < total) {
+    pagination.next = {
+      page: page + 1,
+      limit
+    };
+  }
+
+  if (startIndex > 0) {
+    pagination.prev = {
+      page: page - 1,
+      limit
+    };
+  }
+
+  res.status(200).json({
+    success: true,
+    count: orders.length,
+    total,
+    pagination,
+    data: orders
+  });
+});
+
 // @desc    Get single order
 // @route   GET /api/orders/:id
 // @access  Admin/User
@@ -82,6 +138,11 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
 
   if (!order) {
     return next(new ErrorResponse(`Order not found with id of ${req.params.id}`, 404));
+  }
+
+  // Check if user can access this order (admin or order owner)
+  if (req.user.role !== 'admin' && order.customer.toString() !== req.user._id.toString()) {
+    return next(new ErrorResponse('Not authorized to access this order', 403));
   }
 
   res.status(200).json({
