@@ -60,8 +60,16 @@ const Login = () => {
                 const result = await authService.login(formData.email, formData.password);
                 
                 if (result.success) {
-                    // Redirect to home page
-                    navigate('/');
+                    // Check user role and redirect accordingly
+                    const userRole = result.user?.role || result.data?.role;
+                    
+                    if (userRole === 'admin') {
+                        // Redirect admin to admin dashboard
+                        navigate('/admin/users');
+                    } else {
+                        // Redirect regular users to home page
+                        navigate('/');
+                    }
                 } else {
                     setErrors({ general: result.message });
                 }

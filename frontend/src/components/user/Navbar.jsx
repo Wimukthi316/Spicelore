@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { HiMenu, HiX, HiUser, HiLogout } from 'react-icons/hi';
 import spicelogo from "../../assets/Spicelogo.png";
 import { Link } from 'react-router-dom';
+import authService from '../../services/authService';
 
 
 const Navbar = () => {
@@ -21,6 +22,14 @@ const Navbar = () => {
         const token = localStorage.getItem('token');
         if (token) {
             setIsLoggedIn(true);
+            
+            // First try to get user data from localStorage (faster)
+            const storedUser = authService.getUser();
+            if (storedUser) {
+                setUser(storedUser);
+            }
+            
+            // Then fetch fresh data from API
             fetchUserProfile();
         }
     }, []);
@@ -45,11 +54,10 @@ const Navbar = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
+        authService.logout();
         setIsLoggedIn(false);
         setUser(null);
         setIsUserMenuOpen(false);
-        window.location.href = '/';
     };
 
     return (

@@ -1,15 +1,21 @@
 import { useState, useEffect, useRef } from "react";
 import { FaBell, FaUserCircle, FaChevronDown } from "react-icons/fa";
+import authService from "../../services/authService";
 
 const Topbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const dropdownRef = useRef(null);
 
-    // Dummy user data
-    const user = {
-        name: "John Doe",
-        email: "john.doe@example.com",
-    };
+    // Get logged-in admin user data
+    useEffect(() => {
+        const userData = authService.getUser();
+        if (userData) {
+            setUser(userData);
+        }
+        setIsLoading(false);
+    }, []);
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -21,6 +27,12 @@ const Topbar = () => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // Handle admin logout
+    const handleLogout = () => {
+        authService.logout();
+        setIsDropdownOpen(false);
+    };
 
     return (
         <div className="bg-
@@ -38,7 +50,9 @@ const Topbar = () => {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
                     <FaUserCircle className="w-8 h-8 text-gray-600" />
-                    <span className="text-gray-800 font-medium">{user.name}</span>
+                    <span className="text-gray-800 font-medium">
+                        {isLoading ? 'Loading...' : (user?.name || 'Admin User')}
+                    </span>
                     <FaChevronDown className="w-4 h-4 text-gray-600" />
                 </button>
 
@@ -46,8 +60,12 @@ const Topbar = () => {
                 {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
                         <div className="p-4 border-b border-gray-200">
-                            <p className="text-gray-800 font-medium">{user.name}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
+                            <p className="text-gray-800 font-medium">
+                                {isLoading ? 'Loading...' : (user?.name || 'Admin User')}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                                {isLoading ? 'Loading...' : (user?.email || 'admin@example.com')}
+                            </p>
                         </div>
                         <ul className="py-2">
                             <li>
@@ -61,9 +79,12 @@ const Topbar = () => {
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-all">
+                                <button 
+                                    onClick={handleLogout}
+                                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-all"
+                                >
                                     Logout
-                                </a>
+                                </button>
                             </li>
                         </ul>
                     </div>

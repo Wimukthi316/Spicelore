@@ -13,9 +13,21 @@ class AuthService {
     localStorage.setItem('token', token);
   }
 
+  // Set user data to localStorage
+  setUser(userData) {
+    localStorage.setItem('user', JSON.stringify(userData));
+  }
+
+  // Get user data from localStorage
+  getUser() {
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+  }
+
   // Remove auth token from localStorage
   removeToken() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 
   // Check if user is authenticated
@@ -48,7 +60,8 @@ class AuthService {
 
       if (response.ok) {
         this.setToken(data.token);
-        return { success: true, data: data.data };
+        this.setUser(data.data); // Store user data including role
+        return { success: true, data: data.data, user: data.data };
       } else {
         return { success: false, message: data.message };
       }
