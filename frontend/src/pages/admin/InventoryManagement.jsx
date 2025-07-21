@@ -76,12 +76,16 @@ const InventoryManagement = () => {
       {
         data: inventoryData.map((item) => item.stock),
         backgroundColor: [
-          '#6A994E', '#A7C957', '#386641', '#BFD200', '#D4E157',
-          '#8BC34A', '#CDDC39', '#827717', '#689F38', '#9E9D24'
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+          '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+          '#F8C471', '#82E0AA', '#F1948A', '#AED6F1', '#A9DFBF',
+          '#FAD7A0', '#D7BDE2', '#A3E4D7', '#F9E79F', '#D5A6BD'
         ],
         hoverBackgroundColor: [
-          '#558647', '#94B845', '#2F5734', '#A5B200', '#C3D82C',
-          '#7CB342', '#C0CA33', '#6D5F00', '#5C872A', '#8A8A19'
+          '#FF5252', '#26A69A', '#2196F3', '#66BB6A', '#FFD54F',
+          '#BA68C8', '#4DB6AC', '#FDD835', '#9C27B0', '#42A5F5',
+          '#FFB74D', '#66BB6A', '#EF5350', '#64B5F6', '#81C784',
+          '#FFCC02', '#CE93D8', '#80CBC4', '#FFF176', '#C48B9F'
         ],
       },
     ],
