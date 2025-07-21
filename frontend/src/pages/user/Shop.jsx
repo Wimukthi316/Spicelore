@@ -3,23 +3,92 @@ import { MdShoppingCart } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
-import ProductCard from "../../components/user/ProductCard"; // Import ProductCard
+import ProductCard from "../../components/user/ProductCard";
+import shopService from "../../services/shopService";
 
 const Shop = () => {
     const navigate = useNavigate();
-    const [products] = useState([
-        { id: 1, name: "Turmeric Powder", price: 12.99, description: "Rich in flavor and health benefits.", image: "/src/assets/turmeric.jpg", category: "powder" },
-        { id: 2, name: "Cloves", price: 8.99, description: "Aromatic and perfect for curries.", image: "/src/assets/cloves.jpg", category: "whole" },
-        { id: 3, name: "Cinnamon Sticks", price: 10.99, description: "Sweet and spicy, ideal for desserts.", image: "/src/assets/cinnamon.jpg", category: "whole" },
-        { id: 4, name: "Black Pepper", price: 9.99, description: "Bold and pungent, perfect for seasoning.", image: "/src/assets/blackpepper.jpg", category: "whole" },
-        { id: 5, name: "Cardamom Pods", price: 14.99, description: "Fragrant and sweet, great for tea and desserts.", image: "/src/assets/Cardamon.jpg", category: "whole" },
-        { id: 6, name: "Chili Powder", price: 7.99, description: "Spicy and vibrant, adds heat to any dish.", image: "/src/assets/chili-powder.jpg", category: "powder" },
-    ]);
-
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [showCartIcon, setShowCartIcon] = useState(true);
     const footerRef = useRef(null);
+
+    // Fetch products and categories on component mount
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    // Fetch products from backend
+    const fetchProducts = async () => {
+        try {
+            setIsLoading(true);
+            setError('');
+            const response = await shopService.getProducts({
+                inStock: true, // Only show products that are in stock
+                limit: 100 // Get more products for shop display
+            });
+            setProducts(response.data || []);
+        } catch (err) {
+            setError(err.message || 'Failed to load products');
+            console.error('Error fetching products:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle search with backend
+    const handleSearch = async (query) => {
+        if (!query.trim()) {
+            fetchProducts();
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const response = await shopService.searchProducts(query);
+            setProducts(response.data || []);
+        } catch (err) {
+            setError(err.message || 'Search failed');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle category filter with backend
+    const handleCategoryFilter = async (category) => {
+        try {
+            setIsLoading(true);
+            const response = await shopService.getProducts({
+                category: category,
+                inStock: true,
+                search: searchQuery || undefined
+            });
+            setProducts(response.data || []);
+        } catch (err) {
+            setError(err.message || 'Failed to filter products');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Update search query and trigger search
+    const onSearchChange = (query) => {
+        setSearchQuery(query);
+        if (query.trim()) {
+            handleSearch(query);
+        } else {
+            handleCategoryFilter(selectedCategory);
+        }
+    };
+
+    // Update category and trigger filter
+    const onCategoryChange = (category) => {
+        setSelectedCategory(category);
+        handleCategoryFilter(category);
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -36,15 +105,16 @@ const Shop = () => {
         navigate("/cart");
     };
 
-    const handleAddToCart = (product) => {
-        console.log("Added to cart:", product);
+    const handleAddToCart = async (product) => {
+        try {
+            await shopService.purchaseProduct(product._id, 1);
+            // Refresh products to update stock
+            fetchProducts();
+            console.log("Added to cart:", product);
+        } catch (err) {
+            alert(err.message || 'Failed to add to cart');
+        }
     };
-
-    const filteredProducts = products.filter((product) => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
 
     return (
         <>
@@ -71,24 +141,61 @@ const Shop = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="flex flex-col md:flex-row gap-4 mb-8 justify-center items-center">
-                    <input type="text" placeholder="Search spices..." className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#351108]" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                    <select className="w-full md:w-48 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#351108]" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                    <input 
+                        type="text" 
+                        placeholder="Search spices..." 
+                        className="w-full md:w-64 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#351108]" 
+                        value={searchQuery} 
+                        onChange={(e) => onSearchChange(e.target.value)} 
+                    />
+                    <select 
+                        className="w-full md:w-48 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#351108]" 
+                        value={selectedCategory} 
+                        onChange={(e) => onCategoryChange(e.target.value)}
+                    >
                         <option value="all">All Categories</option>
                         <option value="powder">Powder</option>
                         <option value="whole">Whole</option>
+                        <option value="blends">Blends</option>
+                        <option value="organic">Organic</option>
+                        <option value="exotic">Exotic</option>
                     </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
-                    ))}
-                </div>
-
-                {filteredProducts.length === 0 && (
-                    <div className="text-center py-12">
-                        <p className="text-gray-600 text-lg">No spices found matching your criteria.</p>
+                {/* Error Message */}
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
+                        {error}
                     </div>
+                )}
+
+                {/* Loading State */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#351108]"></div>
+                        <span className="ml-2 text-gray-600">Loading products...</span>
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {products.map((product) => (
+                                <ProductCard 
+                                    key={product._id || product.id} 
+                                    product={{
+                                        ...product,
+                                        image: product.images && product.images[0] ? product.images[0].url : '/src/assets/turmeric.jpg'
+                                    }} 
+                                    onAddToCart={handleAddToCart} 
+                                />
+                            ))}
+                        </div>
+
+                        {products.length === 0 && (
+                            <div className="text-center py-12">
+                                <p className="text-gray-600 text-lg">No spices found matching your criteria.</p>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 

@@ -464,3 +464,80 @@ exports.searchProducts = asyncHandler(async (req, res, next) => {
     data: products
   });
 });
+
+// @desc    Update product stock
+// @route   PUT /api/products/:id/stock
+// @access  Private/Admin
+exports.updateProductStock = asyncHandler(async (req, res, next) => {
+  const { stock, operation = 'set' } = req.body;
+
+  let product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorResponse('Product not found', 404));
+  }
+
+  // Update stock based on operation
+  if (operation === 'add') {
+    product.stock += parseInt(stock);
+  } else if (operation === 'subtract') {
+    product.stock = Math.max(0, product.stock - parseInt(stock));
+  } else {
+    product.stock = parseInt(stock);
+  }
+
+  product = await product.save();
+
+  res.status(200).json({
+    success: true,
+    data: product
+  });
+});
+
+// @desc    Purchase product (reduce stock)
+// @route   POST /api/products/:id/purchase
+// @access  Private
+exports.purchaseProduct = asyncHandler(async (req, res, next) => {
+  const { quantity = 1 } = req.body;
+
+  let product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorResponse('Product not found', 404));
+  }
+
+  if (!product.isActive) {
+    return next(new ErrorResponse('Product is not available', 400));
+  }
+
+  if (product.stock < quantity) {
+    return next(new ErrorResponse('Insufficient stock', 400));
+  }
+
+  // Reduce stock
+  product.stock -= quantity;
+  product = await product.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Successfully purchased ${quantity} units`,
+    data: {
+      product: product,
+      remainingStock: product.stock,
+      isLowStock: product.isLowStock()
+    }
+  });
+});
+
+// @desc    Get low stock products
+// @route   GET /api/products/low-stock
+// @access  Private/Admin
+exports.getLowStockProducts = asyncHandler(async (req, res, next) => {
+  const products = await Product.getLowStockProducts();
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    data: products
+  });
+});

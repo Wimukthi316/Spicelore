@@ -9,7 +9,10 @@ const {
   addProductReview,
   getProductCategories,
   getFeaturedProducts,
-  searchProducts
+  searchProducts,
+  updateProductStock,
+  purchaseProduct,
+  getLowStockProducts
 } = require('../controllers/productController');
 
 const { protect, authorize, optionalAuth } = require('../middleware/auth');
@@ -25,6 +28,7 @@ router.get('/:id', getProduct);
 
 // Protected routes (require authentication)
 router.post('/:id/reviews', protect, addProductReview);
+router.post('/:id/purchase', protect, purchaseProduct);
 
 // Admin only routes
 router.use(protect);
@@ -32,6 +36,8 @@ router.use(authorize('admin'));
 
 router.post('/', createProduct);
 router.get('/admin/stats', getProductStats);
+router.get('/low-stock', getLowStockProducts);
+router.put('/:id/stock', updateProductStock);
 
 router
   .route('/:id')

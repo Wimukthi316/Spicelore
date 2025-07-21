@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios for API calls
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { FaBox, FaChartBar, FaClipboardList, FaExclamationTriangle, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaBox, FaChartBar, FaClipboardList, FaExclamationTriangle, FaEdit } from 'react-icons/fa';
 import Sidebar from "../../components/admin/Sidebar";
 import Topbar from "../../components/admin/Topbar";
+import productService from "../../services/productService";
 
 // Register Chart.js elements
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -12,9 +12,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const InventoryManagement = () => {
   // State Management
   const [inventoryData, setInventoryData] = useState([]);
-  const [newItem, setNewItem] = useState({ id: '', name: '', stock: '', threshold: '' });
-  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [stockUpdate, setStockUpdate] = useState({ stock: '', operation: 'set' });
 
   // Fetch inventory data from the backend
   useEffect(() => {
@@ -23,11 +25,48 @@ const InventoryManagement = () => {
 
   const fetchInventoryData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/inventory');
-      setInventoryData(response.data);
+      setIsLoading(true);
+      setError('');
+      const response = await productService.getProducts('', 1, 100); // Get all products
+      setInventoryData(response.data || []);
     } catch (error) {
+      setError(error.message || 'Failed to fetch inventory data');
       console.error('Error fetching inventory data:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Handle stock update
+  const handleStockUpdate = async () => {
+    if (!selectedProduct || !stockUpdate.stock) return;
+
+    try {
+      await productService.updateProductStock(selectedProduct._id, {
+        stock: parseInt(stockUpdate.stock),
+        operation: stockUpdate.operation
+      });
+      await fetchInventoryData(); // Refresh data
+      setShowModal(false);
+      setSelectedProduct(null);
+      setStockUpdate({ stock: '', operation: 'set' });
+    } catch (error) {
+      alert(error.message || 'Failed to update stock');
+    }
+  };
+
+  // Open stock update modal
+  const openStockModal = (product) => {
+    setSelectedProduct(product);
+    setStockUpdate({ stock: product.stock.toString(), operation: 'set' });
+    setShowModal(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+    setStockUpdate({ stock: '', operation: 'set' });
   };
 
   // Pie Chart Data
@@ -37,68 +76,24 @@ const InventoryManagement = () => {
       {
         data: inventoryData.map((item) => item.stock),
         backgroundColor: [
-          '#6A994E', // Tea Leaf Green
-          '#A7C957', // Lime Green
-          '#386641', // Dark Forest Green
-          '#BFD200', // Bright Yellow-Green
-          '#D4E157', // Light Olive Green
+          '#6A994E', '#A7C957', '#386641', '#BFD200', '#D4E157',
+          '#8BC34A', '#CDDC39', '#827717', '#689F38', '#9E9D24'
         ],
         hoverBackgroundColor: [
-          '#558647', // Darker Tea Leaf Green
-          '#94B845', // Darker Lime Green
-          '#2F5734', // Darker Forest Green
-          '#A5B200', // Darker Bright Yellow-Green
-          '#BFD64B', // Darker Light Olive Green
+          '#558647', '#94B845', '#2F5734', '#A5B200', '#C3D82C',
+          '#7CB342', '#C0CA33', '#6D5F00', '#5C872A', '#8A8A19'
         ],
       },
     ],
   };
 
   // Low Stock Items
-  const lowStockItems = inventoryData.filter((item) => item.stock < item.threshold);
+  const lowStockItems = inventoryData.filter((item) => item.stock <= item.threshold);
 
-  // CRUD Operations
-  const handleAddItem = () => {
-    setNewItem({ id: '', name: '', stock: '', threshold: '' });
-    setIsEditing(false);
-    setShowModal(true);
-  };
-
-  const handleSaveItem = async () => {
-    if (newItem.name && newItem.stock && newItem.threshold) {
-      try {
-        if (isEditing) {
-          // Update existing item
-          await axios.put(`http://localhost:5000/api/inventory/${newItem._id}`, newItem);
-        } else {
-          // Add new item
-          await axios.post('http://localhost:5000/api/inventory', newItem);
-        }
-        fetchInventoryData(); // Refresh data after adding/updating
-        setShowModal(false);
-      } catch (error) {
-        console.error('Error saving item:', error);
-      }
-    }
-  };
-
-  const handleEditItem = (id) => {
-    const itemToEdit = inventoryData.find((item) => item._id === id);
-    setNewItem(itemToEdit);
-    setIsEditing(true);
-    setShowModal(true);
-  };
-
-  const handleDeleteItem = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        await axios.delete(`http://localhost:5000/api/inventory/${id}`);
-        fetchInventoryData(); // Refresh data after deletion
-      } catch (error) {
-        console.error('Error deleting item:', error);
-      }
-    }
-  };
+  // Statistics
+  const totalItems = inventoryData.length;
+  const totalStock = inventoryData.reduce((sum, item) => sum + item.stock, 0);
+  const lowStockCount = lowStockItems.length;
 
   return (
     <div className="flex bg-white font-kulim">
@@ -108,163 +103,260 @@ const InventoryManagement = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col font-kulim ml-64"> {/* Add margin-left to avoid overlap with Sidebar */}
+      <div className="flex-1 flex flex-col font-kulim ml-64">
         {/* Topbar */}
-        <div className="fixed top-0 left-64 right-0 z-20"> {/* Fixed positioning for Topbar */}
+        <div className="fixed top-0 left-64 right-0 z-20">
           <Topbar />
         </div>
 
-        {/* Main Dashboard Content */}
-        <div className="p-6 space-y-10 bg-white flex-1 overflow-y-auto mt-16"> {/* Add margin-top to avoid overlap with Topbar */}
-          {/* Header */}
-          <header className="flex justify-between items-center mb-10 mt-8">
-            <h1 className="text-3xl font-bold text-gray-800">Inventory Dashboard</h1>
-            <button
-              className="bg-[#745249] text-white px-6 py-3 rounded-lg shadow-md transition-transform hover:scale-105 flex items-center cursor-pointer"
-              onClick={handleAddItem}
-            >
-              Add Item
-            </button>
-          </header>
+        {/* Content */}
+        <div className="flex-1 pt-20 px-8 py-8 bg-gray-50 overflow-y-auto">
+          <h1 className="text-3xl font-bold text-gray-800 mb-8">Inventory Management</h1>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
-              <FaBox className="text-[#745249] text-3xl mr-4" />
-              <div>
-                <h2 className="text-lg font-medium text-gray-700">Total Products</h2>
-                <p className="text-2xl font-bold">{inventoryData.length}</p>
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+              {error}
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
-              <FaClipboardList className="text-[#745249] text-3xl mr-4" />
-              <div>
-                <h2 className="text-lg font-medium text-gray-700">Total Stock</h2>
-                <p className="text-2xl font-bold">
-                  {inventoryData.reduce((sum, item) => sum + item.stock, 0)} units
-                </p>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-xl flex items-center">
-              <FaExclamationTriangle className="text-red-500 text-3xl mr-4" />
-              <div>
-                <h2 className="text-lg font-medium text-gray-700">Low Stock Items</h2>
-                <p className="text-2xl font-bold">{lowStockItems.length}</p>
-              </div>
-            </div>
-          </div>
+          )}
 
-          {/* Inventory Summary */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-24">
-            {/* Inventory Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                <FaChartBar className="mr-2 text-black" /> Inventory Distribution
-              </h2>
-              <div className="h-64">
-                <Pie data={pieChartData} options={{ maintainAspectRatio: false }} />
-              </div>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#745249]"></div>
+              <span className="ml-2 text-gray-600">Loading inventory...</span>
             </div>
+          ) : (
+            <>
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                  <div className="flex items-center">
+                    <FaBox className="text-blue-500 text-2xl mr-3" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-700">Total Products</h3>
+                      <p className="text-2xl font-bold text-blue-600">{totalItems}</p>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Inventory Table */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                <FaClipboardList className="mr-2 text-black" /> Inventory Details
-              </h2>
-              <table className="w-full table-auto border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 p-2">Product Name</th>
-                    <th className="border border-gray-300 p-2">Stock</th>
-                    <th className="border border-gray-300 p-2">Threshold</th>
-                    <th className="border border-gray-300 p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inventoryData.map((item) => (
-                    <tr key={item._id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 p-2">{item.name}</td>
-                      <td className="border border-gray-300 p-2">{item.stock}</td>
-                      <td className="border border-gray-300 p-2">{item.threshold}</td>
-                      <td className="border border-gray-300 py-4 px-7 flex space-x-7">
-                        <button
-                          className="text-blue-800"
-                          onClick={() => handleEditItem(item._id)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="text-red-900"
-                          onClick={() => handleDeleteItem(item._id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+                  <div className="flex items-center">
+                    <FaChartBar className="text-green-500 text-2xl mr-3" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-700">Total Stock</h3>
+                      <p className="text-2xl font-bold text-green-600">{totalStock}</p>
+                    </div>
+                  </div>
+                </div>
 
-          {/* Modal for Add/Edit Item */}
-          {showModal && (
-            <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center">
-              <div className="bg-white p-6 rounded-md shadow-md">
-                <h2 className="text-lg font-bold mb-4">{isEditing ? 'Edit Item' : 'Add Item'}</h2>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Product Name"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    onKeyDown={(e) => {
-                        // Allow only letters and spaces
-                        const key = e.key;
-                        if (!/[A-Za-z\s]/.test(key) && key !== "Backspace") {
-                        e.preventDefault();
-                        }
-                    }}
-                    className="w-full px-4 py-2 border rounded-md"
-                    />
-                  <input
-                    type="number"
-                    placeholder="Stock"
-                    value={newItem.stock}
-                    onChange={(e) => setNewItem({ ...newItem, stock: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-md"
-                    min="0"  // Ensures the price cannot be negative
-                    required
-                  />
-                  <input
-                    type="number"
-                    placeholder="Threshold"
-                    value={newItem.threshold}
-                    onChange={(e) => setNewItem({ ...newItem, threshold: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-md"
-                    min="0"  // Ensures the price cannot be negative
-                    required
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      className="px-4 py-2 bg-gray-300 rounded-md cursor-pointer"
-                      onClick={() => setShowModal(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-[#745249] text-white rounded-md cursor-pointer"
-                      onClick={handleSaveItem}
-                    >
-                      {isEditing ? 'Update' : 'Save'}
-                    </button>
+                <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                  <div className="flex items-center">
+                    <FaExclamationTriangle className="text-red-500 text-2xl mr-3" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-700">Low Stock Items</h3>
+                      <p className="text-2xl font-bold text-red-600">{lowStockCount}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Charts and Low Stock Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Pie Chart */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <FaChartBar className="mr-2" />
+                    Stock Distribution
+                  </h2>
+                  {inventoryData.length > 0 ? (
+                    <div className="h-64">
+                      <Pie data={pieChartData} options={{ maintainAspectRatio: false }} />
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">No data available for chart</p>
+                  )}
+                </div>
+
+                {/* Low Stock Alert */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                    <FaExclamationTriangle className="mr-2 text-red-500" />
+                    Low Stock Alerts
+                  </h2>
+                  <div className="max-h-64 overflow-y-auto">
+                    {lowStockItems.length > 0 ? (
+                      lowStockItems.map((item) => (
+                        <div
+                          key={item._id}
+                          className="flex justify-between items-center p-3 bg-red-50 border border-red-200 rounded-lg mb-2"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-800">{item.name}</p>
+                            <p className="text-sm text-gray-600">
+                              Stock: {item.stock} {item.unit} | Threshold: {item.threshold}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => openStockModal(item)}
+                            className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                          >
+                            Update
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">No low stock items</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Inventory Table */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-700 flex items-center">
+                    <FaClipboardList className="mr-2" />
+                    Inventory List
+                  </h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Product
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Category
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Stock
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {inventoryData.map((item) => (
+                        <tr key={item._id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                {item.images && item.images[0] ? (
+                                  <img
+                                    className="h-10 w-10 rounded-full object-cover"
+                                    src={item.images[0].url}
+                                    alt={item.name}
+                                  />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                    <FaBox className="text-gray-500" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                                <div className="text-sm text-gray-500">SKU: {item.sku}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 capitalize">
+                              {item.category}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {item.stock} {item.unit}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              item.stock > item.threshold
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {item.stock > item.threshold ? 'In Stock' : 'Low Stock'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => openStockModal(item)}
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                            >
+                              <FaEdit className="mr-1" />
+                              Update Stock
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
+
+      {/* Stock Update Modal */}
+      {showModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 mx-4">
+            <h3 className="text-lg font-semibold mb-4">Update Stock: {selectedProduct.name}</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Operation</label>
+                <select
+                  value={stockUpdate.operation}
+                  onChange={(e) => setStockUpdate(prev => ({ ...prev, operation: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="set">Set Stock To</option>
+                  <option value="add">Add To Stock</option>
+                  <option value="subtract">Subtract From Stock</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {stockUpdate.operation === 'set' ? 'New Stock Level' : 'Quantity'}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={stockUpdate.stock}
+                  onChange={(e) => setStockUpdate(prev => ({ ...prev, stock: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="text-sm text-gray-600">
+                Current Stock: {selectedProduct.stock} {selectedProduct.unit}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStockUpdate}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Update Stock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
