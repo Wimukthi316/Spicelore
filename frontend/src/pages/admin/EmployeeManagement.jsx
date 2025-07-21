@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaUserCircle } from "react-icons/fa"; // Only keep used icons
+import { FaPlus, FaEdit, FaTrash, FaUserCircle } from "react-icons/fa";
 import Sidebar from "../../components/admin/Sidebar";
 import Topbar from "../../components/admin/Topbar";
+import authService from "../../services/authService";
 
 // Define the API URL
-const API_URL = "http://localhost:5000/api/employees"; // Replace with your actual API endpoint
+const API_URL = "http://localhost:5000/api/employees";
 
 const EmployeeManagement = () => {
     // State Management
     const [employees, setEmployees] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
     const [formState, setFormState] = useState({
         name: "",
         empid: "",
@@ -26,12 +29,38 @@ const EmployeeManagement = () => {
 
     const fetchEmployees = async () => {
         try {
-            const response = await fetch(API_URL);
+            setIsLoading(true);
+            const token = authService.getToken();
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await fetch(API_URL, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
             const data = await response.json();
-            setEmployees(data); // Ensure data has unique `id` fields
-            console.log("Employees fetched:", data); // Debugging
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch employees');
+            }
+
+            // Handle the response structure - check if data has a 'data' property
+            const employeeList = data.data || data || [];
+            setEmployees(Array.isArray(employeeList) ? employeeList : []);
+            setError('');
+            console.log("Employees fetched:", employeeList);
         } catch (error) {
             console.error("Error fetching employees:", error);
+            setError(error.message || 'Failed to fetch employees');
+            setEmployees([]); // Set empty array as fallback
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -78,60 +107,84 @@ const EmployeeManagement = () => {
 
     // Handle Save (Add / Update Employee)
     const handleSave = async () => {
-        if (isEditing) {
-            try {
+        try {
+            const token = authService.getToken();
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            if (isEditing) {
                 const response = await fetch(`${API_URL}/${editId}`, {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(formState),
                 });
 
                 if (!response.ok) {
-                    throw new Error("Failed to update employee");
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to update employee");
                 }
 
                 await fetchEmployees();
                 setIsEditing(false);
                 setEditId(null);
-            } catch (error) {
-                console.error("Error updating employee:", error);
-            }
-        } else {
-            try {
+            } else {
                 const response = await fetch(API_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify(formState),
                 });
 
                 if (!response.ok) {
-                    throw new Error("Failed to add employee");
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to add employee");
                 }
 
                 await fetchEmployees();
-            } catch (error) {
-                console.error("Error adding employee:", error);
             }
-        }
 
-        setFormState({ name: "", empid: "", role: "", contact: "" });
-        setIsModalOpen(false);
+            setFormState({ name: "", empid: "", role: "", contact: "" });
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error saving employee:", error);
+            alert(error.message || 'Failed to save employee');
+        }
     };
 
     // Handle Employee Delete
     const handleDelete = async (id) => {
-        try {
-            const response = await fetch(`${API_URL}/${id}`, {
-                method: "DELETE",
-            });
+        if (window.confirm('Are you sure you want to delete this employee?')) {
+            try {
+                const token = authService.getToken();
+                
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
 
-            if (!response.ok) {
-                throw new Error("Failed to delete employee");
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to delete employee");
+                }
+
+                await fetchEmployees();
+            } catch (error) {
+                console.error("Error deleting employee:", error);
+                alert(error.message || 'Failed to delete employee');
             }
-
-            await fetchEmployees();
-        } catch (error) {
-            console.error("Error deleting employee:", error);
         }
     };
 
@@ -167,37 +220,61 @@ const EmployeeManagement = () => {
                         </button>
                     </header>
 
-                    {/* Employee Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {employees.map((employee) => (
-                            <div
-                                key={employee._id}
-                                className="bg-white shadow-xl rounded-2xl py-4"
-                            >
-                                <FaUserCircle className="w-24 h-24 text-[#745249] mx-auto mb-6" />
-                                <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
-                                    {employee.name}
-                                </h2>
-                                <p className="text-gray-600 text-center mb-1">{employee.empid}</p>
-                                <p className="text-gray-600 text-center mb-2">{employee.role}</p>
-                                <p className="text-gray-500 text-center mb-6">{employee.contact}</p>
-                                <div className="flex justify-center space-x-6">
-                                    <button
-                                        onClick={() => handleEdit(employee._id)}
-                                        className="text-blue-700 text-2xl p-3 rounded-full transition duration-200 hover:text-blue-900"
-                                    >
-                                        <FaEdit />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(employee._id)}
-                                        className="text-red-800 p-3 text-2xl rounded-full transition duration-200 hover:text-red-900"
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                </div>
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Loading State */}
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#745249]"></div>
+                            <span className="ml-2 text-gray-600">Loading employees...</span>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Employee Cards */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {employees.length === 0 ? (
+                                    <div className="col-span-full text-center py-12">
+                                        <p className="text-gray-500 text-lg">No employees found</p>
+                                        <p className="text-gray-400">Click "Add Employee" to get started</p>
+                                    </div>
+                                ) : (
+                                    employees.map((employee) => (
+                                        <div
+                                            key={employee._id}
+                                            className="bg-white shadow-xl rounded-2xl py-4"
+                                        >
+                                            <FaUserCircle className="w-24 h-24 text-[#745249] mx-auto mb-6" />
+                                            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-2">
+                                                {employee.name}
+                                            </h2>
+                                            <p className="text-gray-600 text-center mb-1">{employee.empid}</p>
+                                            <p className="text-gray-600 text-center mb-2">{employee.role}</p>
+                                            <p className="text-gray-500 text-center mb-6">{employee.contact}</p>
+                                            <div className="flex justify-center space-x-6">
+                                                <button
+                                                    onClick={() => handleEdit(employee._id)}
+                                                    className="text-blue-700 text-2xl p-3 rounded-full transition duration-200 hover:text-blue-900"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(employee._id)}
+                                                    className="text-red-800 p-3 text-2xl rounded-full transition duration-200 hover:text-red-900"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                        ))}
-                    </div>
+                        </>
+                    )}
                 </main>
             </div>
 
