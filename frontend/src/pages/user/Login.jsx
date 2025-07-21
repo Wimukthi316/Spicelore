@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
 import authService from '../../services/authService';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -13,6 +14,16 @@ const Login = () => {
 
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Check if there's a success message from registration
+    useEffect(() => {
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+            // Clear the message from navigation state
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     // Handle form input change
     const handleInputChange = (e) => {
@@ -72,6 +83,13 @@ const Login = () => {
                 <div className="bg-white/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg w-full max-w-md">
                     <h2 className="text-4xl font-bold text-[#351108] mb-6 text-center">Spice Up Your Journey!</h2>
                     <p className="text-center text-gray-700 mb-8">Log in to explore our rich flavors and bring the taste of tradition to your kitchen.</p>
+
+                    {/* Success Message from Registration */}
+                    {successMessage && (
+                        <div className="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg">
+                            {successMessage}
+                        </div>
+                    )}
 
                     {/* General Error Message */}
                     {errors.general && (

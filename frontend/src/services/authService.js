@@ -72,8 +72,9 @@ class AuthService {
       const data = await response.json();
 
       if (response.ok) {
-        this.setToken(data.token);
-        return { success: true, data: data.data };
+        // Don't automatically log in the user after registration
+        // User needs to login manually after registration
+        return { success: true, data: data.data, message: 'Registration successful! Please login with your credentials.' };
       } else {
         return { success: false, message: data.message };
       }

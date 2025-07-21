@@ -15,6 +15,7 @@ const Registration = () => {
 
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     // Handle form input change
     const handleInputChange = (e) => {
@@ -66,6 +67,7 @@ const Registration = () => {
         if (validateForm()) {
             setIsLoading(true);
             setErrors({});
+            setSuccessMessage('');
 
             try {
                 const result = await authService.register({
@@ -75,8 +77,23 @@ const Registration = () => {
                 });
                 
                 if (result.success) {
-                    // Registration successful, redirect to login
-                    navigate('/login');
+                    // Show success message
+                    setSuccessMessage(result.message || 'Registration successful! Please login with your credentials.');
+                    
+                    // Clear form
+                    setFormData({
+                        name: '',
+                        email: '',
+                        password: '',
+                        confirmPassword: '',
+                    });
+                    
+                    // Redirect to login after a short delay
+                    setTimeout(() => {
+                        navigate('/login', { 
+                            state: { message: 'Registration successful! Please login with your credentials.' }
+                        });
+                    }, 2000);
                 } else {
                     setErrors({ general: result.message });
                 }
@@ -96,6 +113,13 @@ const Registration = () => {
             <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/src/assets/Registerbackground.jpg')" }}>
                 <div className="bg-white/50 backdrop-blur-xs p-8 rounded-2xl shadow-lg w-full max-w-md" style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
                     <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Create Your Account</h2>
+
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div className="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg">
+                            {successMessage}
+                        </div>
+                    )}
 
                     {/* General Error Message */}
                     {errors.general && (
