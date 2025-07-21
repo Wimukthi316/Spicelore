@@ -48,6 +48,7 @@ class AuthService {
   // Login user
   async login(email, password) {
     try {
+      console.log('Attempting login for:', email); // Debug log
       const response = await fetch(`${this.baseURL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -57,6 +58,7 @@ class AuthService {
       });
 
       const data = await response.json();
+      console.log('Login response:', data); // Debug log
 
       if (response.ok) {
         this.setToken(data.token);

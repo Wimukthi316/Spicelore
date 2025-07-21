@@ -71,7 +71,7 @@ const UserManagement = () => {
     };
 
     // Validate form fields
-    const validateForm = (user) => {
+    const validateForm = (user, isEdit = false) => {
         const errors = {};
 
         if (!user.name.trim()) {
@@ -82,7 +82,8 @@ const UserManagement = () => {
         } else if (!user.email.includes("@")) {
             errors.email = "Email must contain @.";
         }
-        if (!user.password || user.password.trim().length < 6) {
+        // Only validate password for new users, not for editing
+        if (!isEdit && (!user.password || user.password.trim().length < 6)) {
             errors.password = "Password must be at least 6 characters.";
         }
         if (!user.role) {
@@ -124,7 +125,7 @@ const UserManagement = () => {
 
     // Handle Add User
     const handleAddUser = async () => {
-        const validationErrors = validateForm(newUser);
+        const validationErrors = validateForm(newUser, false);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
@@ -142,14 +143,22 @@ const UserManagement = () => {
 
     // Handle Edit User
     const handleEditUser = async () => {
-        const validationErrors = validateForm(selectedUser);
+        const validationErrors = validateForm(selectedUser, true);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
 
         try {
-            await userService.updateUser(selectedUser._id, selectedUser);
+            // Create update object without password field
+            const updateData = {
+                name: selectedUser.name,
+                email: selectedUser.email,
+                role: selectedUser.role,
+                status: selectedUser.status
+            };
+            
+            await userService.updateUser(selectedUser._id, updateData);
             await fetchUsers(); // Refresh the users list
             await fetchUserStats(); // Refresh stats
             closeEditModal();
