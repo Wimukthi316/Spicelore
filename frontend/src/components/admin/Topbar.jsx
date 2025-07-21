@@ -69,7 +69,7 @@ const Topbar = () => {
                         </div>
                         <ul className="py-2">
                             <li>
-                                <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-all">
+                                <a href="/admin/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-all">
                                     Profile
                                 </a>
                             </li>

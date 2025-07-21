@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FaBox, FaShoppingCart, FaUsers, FaUser, FaChartLine, FaTimes, FaSignOutAlt, FaBoxOpen } from "react-icons/fa";
+import { FaBox, FaShoppingCart, FaUsers, FaUser, FaChartLine, FaTimes, FaSignOutAlt, FaBoxOpen, FaUserCog } from "react-icons/fa";
 
 const Sidebar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -62,15 +62,15 @@ const Sidebar = () => {
                     <div className="flex-grow">
                         <ul className="space-y-6">
                             <li>
-                                <Link to="/admin/users" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/users")}`}>
-                                    <FaUser className={`w-5 h-5 mr-3 ${isActive("/admin/users")}`} />
-                                    <span>User Management</span>
+                                <Link to="/admin/profile" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/profile")}`}>
+                                    <FaUserCog className={`w-5 h-5 mr-3 ${isActive("/admin/profile")}`} />
+                                    <span>Admin Profile</span>
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/admin/employee" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/employee")}`}>
-                                    <FaUsers className={`w-5 h-5 mr-3 ${isActive("/admin/employee")}`} />
-                                    <span>Employee Management</span>
+                                <Link to="/admin/users" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/users")}`}>
+                                    <FaUser className={`w-5 h-5 mr-3 ${isActive("/admin/users")}`} />
+                                    <span>User Management</span>
                                 </Link>
                             </li>
                             <li>
@@ -92,20 +92,20 @@ const Sidebar = () => {
                                 </Link>
                             </li>
                             <li>
+                                <Link to="/admin/employee" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/employee")}`}>
+                                    <FaUsers className={`w-5 h-5 mr-3 ${isActive("/admin/employee")}`} />
+                                    <span>Employee Management</span>
+                                </Link>
+                            </li>
+                            
+                            <li>
                                 <Link to="/admin/sales" className={`flex items-center p-3 rounded-lg hover:bg-white hover:text-black transition-all ${isActive("/admin/sales")}`}>
                                     <FaChartLine className={`w-5 h-5 mr-3 ${isActive("/admin/sales")}`} />
                                     <span>Sales Management</span>
                                 </Link>
                             </li>
+                            
                         </ul>
-                    </div>
-
-                    {/* Log Out Section */}
-                    <div className="p-2">
-                        <Link to="/logout" className="flex items-center p-2 rounded-lg hover:bg-white hover:text-black transition-all text-black">
-                            <FaSignOutAlt className="w-5 h-5 mr-3" />
-                            <span>Log Out</span>
-                        </Link>
                     </div>
                 </nav>
             </div>
