@@ -34,16 +34,22 @@ Spicelore is a full-stack e-commerce platform dedicated to bringing authentic, p
 <div align="center">
 
 ### Home Page
-![Home Page](frontend/public/ProjectIMG/home.png)
+![Home Page](frontend/public/ProjectIMG/Home.jpeg)
 
-### Product Catalog
-![Product Catalog](frontend/public/ProjectIMG/products.png)
+### Shop
+![Product Catalog](frontend/public/ProjectIMG/Shop.jpeg)
 
-### Admin Dashboard
-![Admin Dashboard](frontend/public/ProjectIMG/dashboard.png)
+### ContactUs
+![Admin Dashboard](frontend/public/ProjectIMG/ContactUs.jpeg)
 
-### Order Management
-![Order Management](frontend/public/ProjectIMG/orders.png)
+### AboutUs
+![Order Management](frontend/public/ProjectIMG/AboutUs.jpeg)
+
+### Profile
+![Order Management](frontend/public/ProjectIMG/Profile.jpeg)
+
+### Profile
+![Order Management](frontend/public/ProjectIMG/Profile02.jpeg)
 
 </div>
 
