@@ -754,13 +754,21 @@ const UserProfile = () => {
                           {order.items && order.items.length > 0 ? (
                             order.items.map((item, index) => (
                               <div key={index} className="flex items-center space-x-3 text-sm">
-                                {item.product?.images && item.product.images.length > 0 && (
+                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                                   <img
-                                    src={item.product.images[0]}
+                                    src={
+                                      item.product?.images && item.product.images.length > 0
+                                        ? (item.product.images[0].url || item.product.images[0])
+                                        : '/src/assets/shop.jpg'
+                                    }
                                     alt={item.productName}
-                                    className="w-10 h-10 rounded-lg object-cover"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.target.src = '/src/assets/shop.jpg';
+                                      e.target.onerror = null;
+                                    }}
                                   />
-                                )}
+                                </div>
                                 <div className="flex-1">
                                   <p className="font-medium text-gray-900">{item.productName}</p>
                                   <p className="text-gray-600">Qty: {item.quantity} × {formatPrice(item.price)}</p>
@@ -768,9 +776,18 @@ const UserProfile = () => {
                               </div>
                             ))
                           ) : (
-                            <div className="text-sm text-gray-600">
-                              <p className="font-medium">{order.product}</p>
-                              <p>Qty: {order.quantity}</p>
+                            <div className="flex items-center space-x-3 text-sm">
+                              <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img
+                                  src="/src/assets/shop.jpg"
+                                  alt={order.product}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900">{order.product}</p>
+                                <p className="text-gray-600">Qty: {order.quantity}</p>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -795,13 +812,6 @@ const UserProfile = () => {
                         </div>
                         
                         <div className="flex space-x-2">
-                          <button
-                            onClick={() => window.open(`/orders/${order._id}`, '_blank')}
-                            className="px-3 py-1 text-xs font-medium text-[#351108] bg-white border border-[#351108] rounded-lg hover:bg-[#351108] hover:text-white transition-all duration-300"
-                          >
-                            View Details
-                          </button>
-                          
                           {order.status === 'Delivered' && (
                             <button className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-all duration-300">
                               Review
