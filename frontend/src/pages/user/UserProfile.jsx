@@ -8,6 +8,8 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -24,11 +26,42 @@ const UserProfile = () => {
     confirmPassword: ''
   });
   const [message, setMessage] = useState({ type: '', text: '' });
-  const [showStats, setShowStats] = useState(true);
 
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      setOrdersLoading(true);
+      const response = await fetch('http://localhost:5000/api/payment/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data.data || []);
+      } else {
+        console.error('Failed to fetch orders');
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -300,7 +333,7 @@ const UserProfile = () => {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
-                <div className="text-xl font-bold mb-1">0</div>
+                <div className="text-xl font-bold mb-1">{orders.length}</div>
                 <div className="text-xs text-white/70">Orders</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
@@ -357,7 +390,22 @@ const UserProfile = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span>Profile Information</span>
+                <span>Profile</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                activeTab === 'orders'
+                  ? 'bg-[#351108] text-white shadow-lg'
+                  : 'text-gray-600 hover:text-[#351108] hover:bg-white/50'
+              }`}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11h8" />
+                </svg>
+                <span>Orders</span>
               </div>
             </button>
             <button
@@ -568,6 +616,156 @@ const UserProfile = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-lg border border-white/20 p-6">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-1">Order History</h2>
+              <p className="text-sm text-gray-600">View all your past orders and their status</p>
+            </div>
+
+            {ordersLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="relative">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-[#351108]"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 bg-[#351108] rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M8 11v6h8v-6M8 11h8" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
+                <p className="text-gray-500 mb-4">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                <button
+                  onClick={() => window.location.href = '/shop'}
+                  className="bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-colors"
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <div key={order._id} className="bg-gradient-to-r from-white to-gray-50 rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+                      <div className="mb-2 lg:mb-0">
+                        <h3 className="text-lg font-semibold text-gray-900">Order #{order.orderNumber}</h3>
+                        <p className="text-sm text-gray-500">
+                          Placed on {formatDate(order.createdAt)}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+                          order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                          order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status}
+                        </span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                          order.paymentStatus === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.paymentStatus === 'Failed' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          Payment {order.paymentStatus}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Order Items */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="lg:col-span-2">
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">Items Ordered</h4>
+                        <div className="space-y-3">
+                          {order.items && order.items.map((item, index) => (
+                            <div key={index} className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100">
+                              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                {item.product && item.product.images && item.product.images[0] ? (
+                                  <img
+                                    src={item.product.images[0].url}
+                                    alt={item.productName}
+                                    className="w-full h-full object-cover rounded-lg"
+                                  />
+                                ) : (
+                                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">{item.productName}</p>
+                                <p className="text-xs text-gray-500">Quantity: {item.quantity}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-medium text-gray-900">${(item.total || item.price * item.quantity).toFixed(2)}</p>
+                                <p className="text-xs text-gray-500">${item.price.toFixed(2)} each</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Order Summary */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Subtotal</span>
+                            <span className="font-medium">${(order.subtotal || order.totalAmount - (order.shippingCost || 5)).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Shipping</span>
+                            <span className="font-medium">${(order.shippingCost || 5.00).toFixed(2)}</span>
+                          </div>
+                          {order.tax && order.tax > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Tax</span>
+                              <span className="font-medium">${order.tax.toFixed(2)}</span>
+                            </div>
+                          )}
+                          <hr className="my-2" />
+                          <div className="flex justify-between text-base font-semibold">
+                            <span>Total</span>
+                            <span className="text-[#351108]">${order.totalAmount.toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        {/* Shipping Address */}
+                        {order.shippingAddress && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <h5 className="text-xs font-medium text-gray-900 mb-2">Shipping Address</h5>
+                            <div className="text-xs text-gray-600">
+                              <p className="font-medium">{order.shippingAddress.fullName}</p>
+                              <p>{order.shippingAddress.street}</p>
+                              <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</p>
+                              <p>{order.shippingAddress.country}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Payment Method */}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <h5 className="text-xs font-medium text-gray-900 mb-2">Payment Method</h5>
+                          <p className="text-xs text-gray-600">{order.paymentMethod}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
