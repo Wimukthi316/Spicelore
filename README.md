@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Spicelore Logo](frontend/public/ProjectIMG/logo.png)
+![Spicelore Logo](frontend/src/assets/Spicelogo.png)
 
 *Discover the world of authentic spices with Spicelore - your premium destination for quality spices and culinary excellence.*
 
