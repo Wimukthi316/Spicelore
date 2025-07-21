@@ -76,6 +76,8 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/Sale', salesRoutes); // Note: Using 'Sale' to match your frontend
 app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/cart', require('./routes/cartRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
 // Error handling middleware
 app.use(notFound);

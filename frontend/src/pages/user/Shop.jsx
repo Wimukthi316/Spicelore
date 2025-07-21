@@ -5,6 +5,7 @@ import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
 import ProductCard from "../../components/user/ProductCard";
 import shopService from "../../services/shopService";
+import cartService from "../../services/cartService";
 
 const Shop = () => {
     const navigate = useNavigate();
@@ -107,11 +108,17 @@ const Shop = () => {
 
     const handleAddToCart = async (product) => {
         try {
-            await shopService.purchaseProduct(product._id, 1);
-            // Refresh products to update stock
-            fetchProducts();
-            console.log("Added to cart:", product);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please login to add items to cart');
+                navigate('/login');
+                return;
+            }
+
+            await cartService.addToCart(product._id, 1);
+            alert(`${product.name} added to cart successfully!`);
         } catch (err) {
+            console.error('Error adding to cart:', err);
             alert(err.message || 'Failed to add to cart');
         }
     };
