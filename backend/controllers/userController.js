@@ -100,8 +100,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     role: role || 'user',
     status: status || 'Active',
     phone,
-    address,
-    isEmailVerified: true // Set to true for admin-created users
+    address
   });
 
   // Remove password from output

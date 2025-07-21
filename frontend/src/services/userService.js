@@ -57,7 +57,6 @@ class UserService {
     async createUser(userData) {
         try {
             const token = authService.getToken();
-            console.log('Creating user with data:', userData); // Debug log
             const response = await fetch(`${API_URL}/users`, {
                 method: 'POST',
                 headers: {
@@ -68,10 +67,9 @@ class UserService {
             });
 
             const data = await response.json();
-            console.log('Create user response:', data); // Debug log
 
             if (!response.ok) {
-                throw new Error(data.message || data.error || 'Failed to create user');
+                throw new Error(data.error || 'Failed to create user');
             }
 
             return data;
@@ -85,7 +83,6 @@ class UserService {
     async updateUser(userId, userData) {
         try {
             const token = authService.getToken();
-            console.log('Updating user with data:', userData); // Debug log
             const response = await fetch(`${API_URL}/users/${userId}`, {
                 method: 'PUT',
                 headers: {
@@ -96,10 +93,9 @@ class UserService {
             });
 
             const data = await response.json();
-            console.log('Update user response:', data); // Debug log
 
             if (!response.ok) {
-                throw new Error(data.message || data.error || 'Failed to update user');
+                throw new Error(data.error || 'Failed to update user');
             }
 
             return data;
