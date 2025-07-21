@@ -83,6 +83,10 @@ class UserService {
     async updateUser(userId, userData) {
         try {
             const token = authService.getToken();
+            
+            // Log the data being sent
+            console.log('Updating user with data:', userData);
+            
             const response = await fetch(`${API_URL}/users/${userId}`, {
                 method: 'PUT',
                 headers: {
@@ -93,9 +97,12 @@ class UserService {
             });
 
             const data = await response.json();
+            
+            // Log the response
+            console.log('Update response:', data);
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to update user');
+                throw new Error(data.error || data.message || 'Failed to update user');
             }
 
             return data;

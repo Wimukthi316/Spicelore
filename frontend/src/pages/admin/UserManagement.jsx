@@ -8,6 +8,7 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
@@ -71,7 +72,7 @@ const UserManagement = () => {
     };
 
     // Validate form fields
-    const validateForm = (user) => {
+    const validateForm = (user, isEdit = false) => {
         const errors = {};
 
         if (!user.name.trim()) {
@@ -82,9 +83,14 @@ const UserManagement = () => {
         } else if (!user.email.includes("@")) {
             errors.email = "Email must contain @.";
         }
-        if (!user.password || user.password.trim().length < 6) {
-            errors.password = "Password must be at least 6 characters.";
+        
+        // Only validate password for new users, not for editing
+        if (!isEdit) {
+            if (!user.password || user.password.trim().length < 6) {
+                errors.password = "Password must be at least 6 characters.";
+            }
         }
+        
         if (!user.role) {
             errors.role = "Role is required.";
         }
@@ -99,6 +105,8 @@ const UserManagement = () => {
     const openAddModal = () => {
         setIsAddModalOpen(true);
         setErrors({}); // Clear errors when opening the modal
+        setSuccessMessage(''); // Clear success message
+        setError(''); // Clear general error
     };
 
     // Close Add User Modal
@@ -113,6 +121,8 @@ const UserManagement = () => {
         setSelectedUser(user);
         setIsEditModalOpen(true);
         setErrors({}); // Clear errors when opening the modal
+        setSuccessMessage(''); // Clear success message
+        setError(''); // Clear general error
     };
 
     // Close Edit User Modal
@@ -124,7 +134,7 @@ const UserManagement = () => {
 
     // Handle Add User
     const handleAddUser = async () => {
-        const validationErrors = validateForm(newUser);
+        const validationErrors = validateForm(newUser, false);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
@@ -134,6 +144,8 @@ const UserManagement = () => {
             await userService.createUser(newUser);
             await fetchUsers(); // Refresh the users list
             await fetchUserStats(); // Refresh stats
+            setSuccessMessage('User created successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
             closeAddModal();
         } catch (err) {
             setErrors({ general: err.message || 'Failed to create user' });
@@ -142,18 +154,39 @@ const UserManagement = () => {
 
     // Handle Edit User
     const handleEditUser = async () => {
-        const validationErrors = validateForm(selectedUser);
+        console.log('Editing user:', selectedUser);
+        
+        const validationErrors = validateForm(selectedUser, true);
+        console.log('Validation errors:', validationErrors);
+        
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
 
         try {
-            await userService.updateUser(selectedUser._id, selectedUser);
+            console.log('Sending update request for user ID:', selectedUser._id);
+            
+            // Prepare user data without password field for editing
+            const updateData = {
+                name: selectedUser.name,
+                email: selectedUser.email,
+                role: selectedUser.role,
+                status: selectedUser.status
+            };
+            
+            console.log('Update data:', updateData);
+            
+            const result = await userService.updateUser(selectedUser._id, updateData);
+            console.log('Update result:', result);
+            
             await fetchUsers(); // Refresh the users list
             await fetchUserStats(); // Refresh stats
+            setSuccessMessage('User updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
             closeEditModal();
         } catch (err) {
+            console.error('Edit user error:', err);
             setErrors({ general: err.message || 'Failed to update user' });
         }
     };
@@ -270,6 +303,13 @@ const UserManagement = () => {
                     {error && (
                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                             {error}
+                        </div>
+                    )}
+
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {successMessage}
                         </div>
                     )}
 
