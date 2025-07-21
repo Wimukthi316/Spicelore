@@ -1,28 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaUserPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaUsers, FaSearch } from "react-icons/fa";
 import Sidebar from "../../components/admin/Sidebar";
 import Topbar from "../../components/admin/Topbar";
+import userService from "../../services/userService";
 
 const UserManagement = () => {
-    // Dummy data for demonstration
-    const [users, setUsers] = useState([
-        { id: 1, name: "John Doe", email: "john@example.com", role: "Admin", status: "Active" },
-        { id: 2, name: "Jane Smith", email: "jane@example.com", role: "User", status: "Inactive" },
-        { id: 3, name: "Alice Johnson", email: "alice@example.com", role: "User", status: "Active" },
-    ]);
-
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [newUser, setNewUser] = useState({ name: "", email: "", role: "", status: "" });
-    const [searchQuery, setSearchQuery] = useState(""); // State for search query
+    const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "user", status: "Active" });
+    const [searchQuery, setSearchQuery] = useState("");
+    const [userStats, setUserStats] = useState({ totalUsers: 0, activeUsers: 0, inactiveUsers: 0 });
 
     // Validation errors
     const [errors, setErrors] = useState({});
 
-    // Calculate active and inactive users
-    const activeUsersCount = users.filter((user) => user.status === "Active").length;
-    const inactiveUsersCount = users.filter((user) => user.status === "Inactive").length;
+    // Fetch users from API
+    useEffect(() => {
+        const fetchUsersWithSearch = async () => {
+            try {
+                setIsLoading(true);
+                const data = await userService.getUsers(searchQuery);
+                setUsers(data.data || []);
+                setError('');
+            } catch (err) {
+                setError(err.message || 'Failed to fetch users');
+                console.error('Error fetching users:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUsersWithSearch();
+        fetchUserStats();
+    }, [searchQuery]);
+
+    const fetchUsers = async () => {
+        try {
+            setIsLoading(true);
+            const data = await userService.getUsers(searchQuery);
+            setUsers(data.data || []);
+            setError('');
+        } catch (err) {
+            setError(err.message || 'Failed to fetch users');
+            console.error('Error fetching users:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchUserStats = async () => {
+        try {
+            const data = await userService.getUserStats();
+            setUserStats(data.data || { totalUsers: 0, activeUsers: 0, inactiveUsers: 0 });
+        } catch (err) {
+            console.error('Error fetching user stats:', err);
+        }
+    };
 
     // Block invalid characters in the Name field
     const handleNameKeyDown = (e) => {
@@ -45,6 +82,9 @@ const UserManagement = () => {
         } else if (!user.email.includes("@")) {
             errors.email = "Email must contain @.";
         }
+        if (!user.password || user.password.trim().length < 6) {
+            errors.password = "Password must be at least 6 characters.";
+        }
         if (!user.role) {
             errors.role = "Role is required.";
         }
@@ -64,7 +104,7 @@ const UserManagement = () => {
     // Close Add User Modal
     const closeAddModal = () => {
         setIsAddModalOpen(false);
-        setNewUser({ name: "", email: "", role: "", status: "" });
+        setNewUser({ name: "", email: "", password: "", role: "user", status: "Active" });
         setErrors({}); // Clear errors when closing the modal
     };
 
@@ -83,43 +123,68 @@ const UserManagement = () => {
     };
 
     // Handle Add User
-    const handleAddUser = () => {
+    const handleAddUser = async () => {
         const validationErrors = validateForm(newUser);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-            return; // Prevent submission if there are errors
+            return;
         }
 
-        setUsers([...users, { ...newUser, id: users.length + 1 }]);
-        closeAddModal();
+        try {
+            await userService.createUser(newUser);
+            await fetchUsers(); // Refresh the users list
+            await fetchUserStats(); // Refresh stats
+            closeAddModal();
+        } catch (err) {
+            setErrors({ general: err.message || 'Failed to create user' });
+        }
     };
 
     // Handle Edit User
-    const handleEditUser = () => {
+    const handleEditUser = async () => {
         const validationErrors = validateForm(selectedUser);
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
-            return; // Prevent submission if there are errors
+            return;
         }
 
-        setUsers(users.map((user) => (user.id === selectedUser.id ? selectedUser : user)));
-        closeEditModal();
+        try {
+            await userService.updateUser(selectedUser._id, selectedUser);
+            await fetchUsers(); // Refresh the users list
+            await fetchUserStats(); // Refresh stats
+            closeEditModal();
+        } catch (err) {
+            setErrors({ general: err.message || 'Failed to update user' });
+        }
     };
 
     // Handle Delete User
-    const handleDeleteUser = (id) => {
-        setUsers(users.filter((user) => user.id !== id));
+    const handleDeleteUser = async (userId) => {
+        if (window.confirm('Are you sure you want to delete this user?')) {
+            try {
+                await userService.deleteUser(userId);
+                await fetchUsers(); // Refresh the users list
+                await fetchUserStats(); // Refresh stats
+            } catch (err) {
+                alert(err.message || 'Failed to delete user');
+            }
+        }
     };
 
-    // Filter users based on search query
+    // Filter users based on search query (client-side filtering for immediate feedback)
     const filteredUsers = users.filter((user) => {
         const matchesSearch =
-            user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.status.toLowerCase().includes(searchQuery.toLowerCase());
+            user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.status?.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesSearch;
     });
+
+    // Handle search with debouncing
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
 
     return (
         <div className="min-h-screen bg-white">
@@ -152,7 +217,7 @@ const UserManagement = () => {
                                 type="text"
                                 placeholder="Search users..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={handleSearchChange}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg pl-10 focus:outline-none focus:ring-2 focus:ring-[#745249]"
                             />
                             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -166,7 +231,7 @@ const UserManagement = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-600">Total Users</h3>
-                                    <p className="text-2xl font-bold text-gray-800">{users.length}</p>
+                                    <p className="text-2xl font-bold text-gray-800">{userStats.totalUsers}</p>
                                 </div>
                                 <div className="text-[#745249] text-3xl">
                                     <FaUsers />
@@ -179,7 +244,7 @@ const UserManagement = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-600">Active Users</h3>
-                                    <p className="text-2xl font-bold text-green-900">{activeUsersCount}</p>
+                                    <p className="text-2xl font-bold text-green-900">{userStats.activeUsers}</p>
                                 </div>
                                 <div className="text-green-900 text-3xl">
                                     <FaCheckCircle />
@@ -192,7 +257,7 @@ const UserManagement = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-600">Inactive Users</h3>
-                                    <p className="text-2xl font-bold text-red-900">{inactiveUsersCount}</p>
+                                    <p className="text-2xl font-bold text-red-900">{userStats.inactiveUsers}</p>
                                 </div>
                                 <div className="text-red-900 text-3xl">
                                     <FaTimesCircle />
@@ -201,49 +266,71 @@ const UserManagement = () => {
                         </div>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {error}
+                        </div>
+                    )}
+
                     {/* User Table */}
                     <div className="bg-white bg-opacity-50 backdrop-blur-md rounded-lg shadow-lg overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-300">
-                            <thead className="bg-white">
-                                <tr>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
-                                    <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-300">
-                                {filteredUsers.map((user) => (
-                                    <tr key={user.id} className="transition-all">
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.name}</td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.email}</td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.role}</td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-black">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${user.status === "Active" ? "bg-green-800 bg-opacity-20 text-white" : "bg-red-900 bg-opacity-20 text-white"}`}>
-                                                {user.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 sm:px-6 py-4 text-sm text-white">
-                                            <div className="flex space-x-4">
-                                                <button
-                                                    onClick={() => openEditModal(user)}
-                                                    className="text-[#000000] transition-all cursor-pointer"
-                                                >
-                                                    <FaEdit className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteUser(user.id)}
-                                                    className="text-red-800 transition-all cursor-pointer"
-                                                >
-                                                    <FaTrash className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                        {isLoading ? (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#745249]"></div>
+                                <span className="ml-2 text-gray-600">Loading users...</span>
+                            </div>
+                        ) : (
+                            <table className="min-w-full divide-y divide-gray-300">
+                                <thead className="bg-white">
+                                    <tr>
+                                        <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
+                                        <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
+                                        <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
+                                        <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Status</th>
+                                        <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-300">
+                                    {filteredUsers.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="5" className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                                                No users found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredUsers.map((user) => (
+                                            <tr key={user._id} className="transition-all">
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.name}</td>
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-black">{user.email}</td>
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-black capitalize">{user.role}</td>
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-black">
+                                                    <span className={`px-2 py-1 rounded-full text-xs ${user.status === "Active" ? "bg-green-800 bg-opacity-20 text-white" : "bg-red-900 bg-opacity-20 text-white"}`}>
+                                                        {user.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 sm:px-6 py-4 text-sm text-white">
+                                                    <div className="flex space-x-4">
+                                                        <button
+                                                            onClick={() => openEditModal(user)}
+                                                            className="text-[#000000] transition-all cursor-pointer"
+                                                        >
+                                                            <FaEdit className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteUser(user._id)}
+                                                            className="text-red-800 transition-all cursor-pointer"
+                                                        >
+                                                            <FaTrash className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
             </div>
@@ -253,6 +340,14 @@ const UserManagement = () => {
                 <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white shadow-2xl bg-opacity-70 backdrop-blur-md p-6 sm:p-8 rounded-2xl w-11/12 sm:w-96">
                         <h2 className="text-2xl font-bold text-gray-700 mb-6">Add User</h2>
+                        
+                        {/* General Error Display */}
+                        {errors.general && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {errors.general}
+                            </div>
+                        )}
+                        
                         <form>
                             <div className="space-y-4">
                                 {/* Name Field */}
@@ -286,6 +381,21 @@ const UserManagement = () => {
                                     )}
                                 </div>
 
+                                {/* Password Field */}
+                                <div>
+                                    <label className="block text-gray-700 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        placeholder="Password (min 6 characters)"
+                                        value={newUser.password}
+                                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                    />
+                                    {errors.password && (
+                                        <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                                    )}
+                                </div>
+
                                 {/* Role Field */}
                                 <div>
                                     <label className="block text-gray-700 mb-2">Role</label>
@@ -297,8 +407,8 @@ const UserManagement = () => {
                                         <option value="" disabled>
                                             Select Role
                                         </option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="User">User</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="user">User</option>
                                     </select>
                                     {errors.role && (
                                         <p className="text-red-500 text-sm mt-1">{errors.role}</p>
@@ -352,6 +462,14 @@ const UserManagement = () => {
                 <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white shadow-2xl bg-opacity-70 backdrop-blur-md p-6 sm:p-8 rounded-2xl w-11/12 sm:w-96">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit User</h2>
+                        
+                        {/* General Error Display */}
+                        {errors.general && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {errors.general}
+                            </div>
+                        )}
+                        
                         <form>
                             <div className="space-y-4">
                                 {/* Name Field */}
@@ -396,8 +514,8 @@ const UserManagement = () => {
                                         <option value="" disabled>
                                             Select Role
                                         </option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="User">User</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="user">User</option>
                                     </select>
                                     {errors.role && (
                                         <p className="text-red-500 text-sm mt-1">{errors.role}</p>
