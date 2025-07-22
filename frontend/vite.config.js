@@ -8,4 +8,15 @@ export default defineConfig({
     react(), // React plugin
     tailwindcss(), // Tailwind CSS plugin
   ],
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  base: './',
 });
