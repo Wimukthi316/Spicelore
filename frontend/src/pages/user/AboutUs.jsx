@@ -1,5 +1,5 @@
 import React from 'react';
-import spicesImage from '../../assets/story.jpg'; // Image for Our Story
+import spicesImage from '../../assets/Story.jpg'; // Image for Our Story
 import missionImage from '../../assets/Mission.png'; // Image for Our Mission
 import Navbar from "../../components/user/Navbar";
 import Footer from "../../components/user/Footer";
