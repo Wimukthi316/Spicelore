@@ -44,7 +44,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, phoneNumber, address, role } = req.body;
 
   // Validate required fields
   if (!name || !email || !password) {
@@ -57,13 +57,34 @@ exports.register = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('User with this email already exists', 400));
   }
 
-  // Create user
-  const user = await User.create({
+  // Prepare user data
+  const userData = {
     name,
     email,
     password,
     role: role || 'user'
-  });
+  };
+
+  // Add phone number if provided
+  if (phoneNumber) {
+    userData.phone = phoneNumber;
+  }
+
+  // Add address if provided (parse it for street, city, etc. or store as is)
+  if (address) {
+    // For now, we'll store the full address in the street field
+    // You can enhance this later to parse different address components
+    userData.address = {
+      street: address,
+      city: '',
+      state: '',
+      zipCode: '',
+      country: ''
+    };
+  }
+
+  // Create user
+  const user = await User.create(userData);
 
   sendTokenResponse(user, 201, res);
 });
