@@ -139,11 +139,42 @@ const Login = () => {
                         navigate('/');
                     }
                 } else {
-                    setErrors({ general: result.message });
+                    // Handle specific login errors
+                    const errorMessage = result.message.toLowerCase();
+                    if (errorMessage.includes('invalid credentials') || errorMessage.includes('incorrect password') || errorMessage.includes('password')) {
+                        setErrors({ 
+                            password: 'Incorrect password. Please check your password and try again.',
+                            general: 'Login failed. Please check your email and password.'
+                        });
+                    } else if (errorMessage.includes('user not found') || errorMessage.includes('email')) {
+                        setErrors({ 
+                            email: 'No account found with this email address.',
+                            general: 'Login failed. Please check your email address or create a new account.'
+                        });
+                    } else if (errorMessage.includes('account')) {
+                        setErrors({ general: result.message });
+                    } else {
+                        setErrors({ general: 'Login failed. Please check your email and password.' });
+                    }
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                setErrors({ general: 'Login failed. Please try again.' });
+                if (error.response?.status === 401) {
+                    setErrors({ 
+                        general: 'Invalid email or password. Please check your credentials and try again.',
+                        email: 'Please verify your email address.',
+                        password: 'Please verify your password.'
+                    });
+                } else if (error.response?.status === 404) {
+                    setErrors({ 
+                        email: 'No account found with this email address.',
+                        general: 'Account not found. Please check your email or create a new account.'
+                    });
+                } else if (error.response?.data?.message) {
+                    setErrors({ general: error.response.data.message });
+                } else {
+                    setErrors({ general: 'Login failed. Please check your internet connection and try again.' });
+                }
             } finally {
                 setIsLoading(false);
             }
