@@ -97,6 +97,30 @@ class AuthService {
     }
   }
 
+  // Forgot password
+  async forgotPassword(email) {
+    try {
+      const response = await fetch(`${this.baseURL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      return { success: false, message: 'Failed to send reset email. Please try again.' };
+    }
+  }
+
   // Get user profile
   async getProfile() {
     try {

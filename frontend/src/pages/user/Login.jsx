@@ -15,6 +15,10 @@ const Login = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+    const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
     // Check if there's a success message from registration
     useEffect(() => {
@@ -25,24 +29,77 @@ const Login = () => {
         }
     }, [location]);
 
+    // Load saved credentials on component mount
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        const savedPassword = localStorage.getItem('rememberedPassword');
+        const wasRemembered = localStorage.getItem('rememberMe') === 'true';
+
+        if (wasRemembered && savedEmail && savedPassword) {
+            setFormData({
+                email: savedEmail,
+                password: savedPassword,
+            });
+            setRememberMe(true);
+        }
+    }, []);
+
     // Handle form input change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
+    // Handle forgot password
+    const handleForgotPassword = async () => {
+        if (!forgotPasswordEmail) {
+            setErrors({ forgotPassword: 'Please enter your email address.' });
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotPasswordEmail)) {
+            setErrors({ forgotPassword: 'Please enter a valid email address.' });
+            return;
+        }
+
+        setForgotPasswordLoading(true);
+        setErrors({});
+
+        try {
+            const result = await authService.forgotPassword(forgotPasswordEmail);
+            if (result.success) {
+                setSuccessMessage('Password reset link has been sent to your email.');
+                setShowForgotPassword(false);
+                setForgotPasswordEmail('');
+            } else {
+                setErrors({ forgotPassword: result.message || 'Failed to send reset email.' });
+            }
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            setErrors({ forgotPassword: 'Failed to send reset email. Please try again.' });
+        } finally {
+            setForgotPasswordLoading(false);
+        }
+    };
+
     // Validate form
     const validateForm = () => {
         const newErrors = {};
 
+        // Email validation
         if (!formData.email) {
-            newErrors.email = 'Email is required.';
+            newErrors.email = 'Email address is required.';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid email address.';
+            newErrors.email = 'Please enter a valid email address (e.g., user@example.com).';
+        } else if (formData.email.length > 100) {
+            newErrors.email = 'Email address is too long.';
         }
 
+        // Password validation
         if (!formData.password) {
             newErrors.password = 'Password is required.';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters long.';
         }
 
         setErrors(newErrors);
@@ -60,6 +117,17 @@ const Login = () => {
                 const result = await authService.login(formData.email, formData.password);
                 
                 if (result.success) {
+                    // Handle remember me functionality
+                    if (rememberMe) {
+                        localStorage.setItem('rememberedEmail', formData.email);
+                        localStorage.setItem('rememberedPassword', formData.password);
+                        localStorage.setItem('rememberMe', 'true');
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                        localStorage.removeItem('rememberedPassword');
+                        localStorage.removeItem('rememberMe');
+                    }
+
                     // Check user role and redirect accordingly
                     const userRole = result.user?.role || result.data?.role;
                     
@@ -122,7 +190,7 @@ const Login = () => {
                         </div>
 
                         {/* Password Field */}
-                        <div className="mb-6">
+                        <div className="mb-4">
                             <label className="block text-gray-700 mb-2">Password</label>
                             <input
                                 type="password"
@@ -133,6 +201,29 @@ const Login = () => {
                                 placeholder="Enter your password"
                             />
                             {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+                        </div>
+
+                        {/* Remember Me and Forgot Password */}
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    className="h-4 w-4 text-[#351108] focus:ring-[#351108] border-gray-300 rounded"
+                                />
+                                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+                                    Remember me
+                                </label>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowForgotPassword(true)}
+                                className="text-sm text-[#351108] hover:text-amber-900"
+                            >
+                                Forgot password?
+                            </button>
                         </div>
 
                         {/* Submit Button */}
@@ -166,6 +257,54 @@ const Login = () => {
                     </p>
                 </div>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-semibold text-[#351108] mb-4">Reset Password</h3>
+                        <p className="text-gray-600 mb-4">
+                            Enter your email address and we'll send you a link to reset your password.
+                        </p>
+                        
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Email Address</label>
+                            <input
+                                type="email"
+                                value={forgotPasswordEmail}
+                                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                placeholder="Enter your email address"
+                            />
+                            {errors.forgotPassword && (
+                                <p className="text-red-600 text-sm mt-1">{errors.forgotPassword}</p>
+                            )}
+                        </div>
+
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowForgotPassword(false);
+                                    setForgotPasswordEmail('');
+                                    setErrors({});
+                                }}
+                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                disabled={forgotPasswordLoading}
+                                className="px-4 py-2 bg-[#351108] text-white rounded-lg hover:bg-amber-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {forgotPasswordLoading ? 'Sending...' : 'Send Reset Link'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <Footer />
         </>
