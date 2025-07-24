@@ -11,6 +11,8 @@ const Registration = () => {
         email: '',
         password: '',
         confirmPassword: '',
+        address: '',
+        phoneNumber: '',
     });
 
     const [errors, setErrors] = useState({});
@@ -24,6 +26,13 @@ const Registration = () => {
         if (name === "name") {
             // Allow only letters and spaces
             if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+        }
+
+        if (name === "phoneNumber") {
+            // Allow only numbers, spaces, hyphens, and plus sign
+            if (!/^[0-9\s\-+]*$/.test(value)) {
                 return;
             }
         }
@@ -43,6 +52,18 @@ const Registration = () => {
             newErrors.email = 'Email is required.';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Invalid email address.';
+        }
+
+        if (!formData.address) {
+            newErrors.address = 'Address is required.';
+        } else if (formData.address.length < 10) {
+            newErrors.address = 'Address must be at least 10 characters.';
+        }
+
+        if (!formData.phoneNumber) {
+            newErrors.phoneNumber = 'Phone number is required.';
+        } else if (!/^[+]?[0-9\s-]{7,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+            newErrors.phoneNumber = 'Invalid phone number format. Must be 7-15 digits.';
         }
 
         if (!formData.password) {
@@ -73,7 +94,9 @@ const Registration = () => {
                 const result = await authService.register({
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password
+                    password: formData.password,
+                    address: formData.address,
+                    phoneNumber: formData.phoneNumber
                 });
                 
                 if (result.success) {
@@ -86,6 +109,8 @@ const Registration = () => {
                         email: '',
                         password: '',
                         confirmPassword: '',
+                        address: '',
+                        phoneNumber: '',
                     });
                     
                     // Redirect to login after a short delay
@@ -155,6 +180,34 @@ const Registration = () => {
                                 placeholder="Enter your email"
                             />
                             {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                        </div>
+
+                        {/* Address Field */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Address</label>
+                            <textarea
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                                rows="3"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] resize-none"
+                                placeholder="Enter your full address"
+                            />
+                            {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+                        </div>
+
+                        {/* Phone Number Field */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Phone Number</label>
+                            <input
+                                type="tel"
+                                name="phoneNumber"
+                                value={formData.phoneNumber}
+                                onChange={handleInputChange}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                placeholder="Enter your phone number"
+                            />
+                            {errors.phoneNumber && <p className="text-red-600 text-sm mt-1">{errors.phoneNumber}</p>}
                         </div>
 
                         {/* Password Field */}
