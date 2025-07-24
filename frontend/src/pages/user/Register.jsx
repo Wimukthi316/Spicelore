@@ -205,117 +205,117 @@ const Registration = () => {
         <>
             <Navbar />
 
-            <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/src/assets/Registerbackground.jpg')" }}>
-                <div className="bg-white/50 backdrop-blur-xs p-8 rounded-2xl shadow-lg w-full max-w-md" style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
-                    <h2 className="text-2xl font-bold text-[#351108] mb-6 text-center">Create Your Account</h2>
+            <div className="min-h-screen flex items-center justify-center bg-cover bg-center py-8" style={{ backgroundImage: "url('/src/assets/Registerbackground.jpg')" }}>
+                <div className="bg-white/50 backdrop-blur-xs p-6 rounded-2xl shadow-lg w-full max-w-md mx-4 my-4 max-h-[90vh] overflow-y-auto" style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
+                    <h2 className="text-2xl font-bold text-[#351108] mb-4 text-center">Create Your Account</h2>
 
                     {/* Success Message */}
                     {successMessage && (
-                        <div className="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg">
+                        <div className="mb-3 p-2 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm">
                             {successMessage}
                         </div>
                     )}
 
                     {/* General Error Message */}
                     {errors.general && (
-                        <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                        <div className="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
                             {errors.general}
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} className="space-y-3">
                         {/* Name Field */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Name</label>
+                        <div className="mb-3">
+                            <label className="block text-gray-700 mb-1 text-sm">Name</label>
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Enter your name"
                             />
-                            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                            {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name}</p>}
                         </div>
 
                         {/* Email Field */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Email</label>
+                        <div className="mb-3">
+                            <label className="block text-gray-700 mb-1 text-sm">Email</label>
                             <input
                                 type="email"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Enter your email"
                             />
-                            {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+                            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email}</p>}
                         </div>
 
                         {/* Address Field */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Address</label>
-                            <textarea
+                        <div className="mb-3">
+                            <label className="block text-gray-700 mb-1 text-sm">Address</label>
+                            <input
+                                type="text"
                                 name="address"
                                 value={formData.address}
                                 onChange={handleInputChange}
-                                rows="3"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] resize-none"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Enter your full address"
                             />
-                            {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+                            {errors.address && <p className="text-red-600 text-xs mt-1">{errors.address}</p>}
                         </div>
 
                         {/* Phone Number Field */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Phone Number</label>
+                        <div className="mb-3">
+                            <label className="block text-gray-700 mb-1 text-sm">Phone Number</label>
                             <input
                                 type="tel"
                                 name="phoneNumber"
                                 value={formData.phoneNumber}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Enter your phone number"
                             />
-                            {errors.phoneNumber && <p className="text-red-600 text-sm mt-1">{errors.phoneNumber}</p>}
+                            {errors.phoneNumber && <p className="text-red-600 text-xs mt-1">{errors.phoneNumber}</p>}
                         </div>
 
                         {/* Password Field */}
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Password</label>
+                        <div className="mb-3">
+                            <label className="block text-gray-700 mb-1 text-sm">Password</label>
                             <input
                                 type="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Enter your password"
                             />
-                            {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+                            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
                             
                             {/* Password Strength Indicator */}
                             {formData.password && (
-                                <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-sm font-medium text-gray-700 mb-2">Password requirements:</p>
+                                <div className="mt-2 p-2 bg-gray-50 rounded-lg">
+                                    <p className="text-xs font-medium text-gray-700 mb-1">Password requirements:</p>
                                     <div className="space-y-1">
                                         <div className={`flex items-center text-xs ${passwordStrength.length ? 'text-green-600' : 'text-red-600'}`}>
-                                            <span className="mr-2">{passwordStrength.length ? '✓' : '✗'}</span>
+                                            <span className="mr-1 text-xs">{passwordStrength.length ? '✓' : '✗'}</span>
                                             At least 8 characters
                                         </div>
                                         <div className={`flex items-center text-xs ${passwordStrength.lowercase ? 'text-green-600' : 'text-red-600'}`}>
-                                            <span className="mr-2">{passwordStrength.lowercase ? '✓' : '✗'}</span>
+                                            <span className="mr-1 text-xs">{passwordStrength.lowercase ? '✓' : '✗'}</span>
                                             One lowercase letter
                                         </div>
                                         <div className={`flex items-center text-xs ${passwordStrength.uppercase ? 'text-green-600' : 'text-red-600'}`}>
-                                            <span className="mr-2">{passwordStrength.uppercase ? '✓' : '✗'}</span>
+                                            <span className="mr-1 text-xs">{passwordStrength.uppercase ? '✓' : '✗'}</span>
                                             One uppercase letter
                                         </div>
                                         <div className={`flex items-center text-xs ${passwordStrength.number ? 'text-green-600' : 'text-red-600'}`}>
-                                            <span className="mr-2">{passwordStrength.number ? '✓' : '✗'}</span>
+                                            <span className="mr-1 text-xs">{passwordStrength.number ? '✓' : '✗'}</span>
                                             One number
                                         </div>
                                         <div className={`flex items-center text-xs ${passwordStrength.special ? 'text-green-600' : 'text-red-600'}`}>
-                                            <span className="mr-2">{passwordStrength.special ? '✓' : '✗'}</span>
+                                            <span className="mr-1 text-xs">{passwordStrength.special ? '✓' : '✗'}</span>
                                             One special character (@$!%*?&)
                                         </div>
                                     </div>
@@ -324,31 +324,31 @@ const Registration = () => {
                         </div>
 
                         {/* Confirm Password Field */}
-                        <div className="mb-6">
-                            <label className="block text-gray-700 mb-2">Confirm Password</label>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-1 text-sm">Confirm Password</label>
                             <input
                                 type="password"
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108]"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#351108] text-sm"
                                 placeholder="Confirm your password"
                             />
-                            {errors.confirmPassword && <p className="text-red-600 text-sm mt-1">{errors.confirmPassword}</p>}
+                            {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword}</p>}
                         </div>
 
                         {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-[#351108] text-white px-6 py-3 rounded-lg hover:bg-amber-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-[#351108] text-white px-6 py-2 rounded-lg hover:bg-amber-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         >
                             {isLoading ? 'Creating Account...' : 'Register'}
                         </button>
                     </form>
 
                     {/* Login Link */}
-                    <p className="text-center mt-6">
+                    <p className="text-center mt-4 text-sm">
                         Already have an account?{' '}
                         <Link to="/login" className="text-[#351108] hover:text-amber-900">
                             Login here
