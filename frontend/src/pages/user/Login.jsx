@@ -53,12 +53,17 @@ const Login = () => {
     // Handle forgot password
     const handleForgotPassword = async () => {
         if (!forgotPasswordEmail) {
-            setErrors({ forgotPassword: 'Please enter your email address.' });
+            setErrors({ forgotPassword: 'Please enter your email address to reset your password.' });
             return;
         }
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotPasswordEmail)) {
-            setErrors({ forgotPassword: 'Please enter a valid email address.' });
+            setErrors({ forgotPassword: 'Please enter a valid email address (e.g., user@example.com).' });
+            return;
+        }
+
+        if (forgotPasswordEmail.length > 100) {
+            setErrors({ forgotPassword: 'Email address is too long.' });
             return;
         }
 
@@ -68,15 +73,26 @@ const Login = () => {
         try {
             const result = await authService.forgotPassword(forgotPasswordEmail);
             if (result.success) {
-                setSuccessMessage('Password reset link has been sent to your email.');
+                setSuccessMessage('Password reset instructions have been sent to your email address. Please check your inbox and spam folder.');
                 setShowForgotPassword(false);
                 setForgotPasswordEmail('');
             } else {
-                setErrors({ forgotPassword: result.message || 'Failed to send reset email.' });
+                const errorMessage = result.message.toLowerCase();
+                if (errorMessage.includes('user not found') || errorMessage.includes('email')) {
+                    setErrors({ forgotPassword: 'No account found with this email address. Please check your email or create a new account.' });
+                } else {
+                    setErrors({ forgotPassword: result.message || 'Failed to send password reset email.' });
+                }
             }
         } catch (error) {
             console.error('Forgot password error:', error);
-            setErrors({ forgotPassword: 'Failed to send reset email. Please try again.' });
+            if (error.response?.status === 404) {
+                setErrors({ forgotPassword: 'No account found with this email address. Please check your email or create a new account.' });
+            } else if (error.response?.data?.message) {
+                setErrors({ forgotPassword: error.response.data.message });
+            } else {
+                setErrors({ forgotPassword: 'Failed to send password reset email. Please check your internet connection and try again.' });
+            }
         } finally {
             setForgotPasswordLoading(false);
         }

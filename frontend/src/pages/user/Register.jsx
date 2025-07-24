@@ -18,23 +18,61 @@ const Registration = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState({
+        length: false,
+        lowercase: false,
+        uppercase: false,
+        number: false,
+        special: false
+    });
 
     // Handle form input change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
 
         if (name === "name") {
-            // Allow only letters and spaces
+            // Allow only letters and spaces, and limit length
             if (!/^[a-zA-Z\s]*$/.test(value)) {
+                return;
+            }
+            if (value.length > 50) {
                 return;
             }
         }
 
         if (name === "phoneNumber") {
-            // Allow only numbers, spaces, hyphens, and plus sign
+            // Allow only numbers, spaces, hyphens, and plus sign, limit length
             if (!/^[0-9\s\-+]*$/.test(value)) {
                 return;
             }
+            if (value.length > 20) {
+                return;
+            }
+        }
+
+        if (name === "email") {
+            // Limit email length
+            if (value.length > 100) {
+                return;
+            }
+        }
+
+        if (name === "address") {
+            // Limit address length
+            if (value.length > 200) {
+                return;
+            }
+        }
+
+        // Update password strength when password changes
+        if (name === "password") {
+            setPasswordStrength({
+                length: value.length >= 8,
+                lowercase: /(?=.*[a-z])/.test(value),
+                uppercase: /(?=.*[A-Z])/.test(value),
+                number: /(?=.*\d)/.test(value),
+                special: /(?=.*[@$!%*?&])/.test(value)
+            });
         }
 
         setFormData({ ...formData, [name]: value });
@@ -45,37 +83,69 @@ const Registration = () => {
         const newErrors = {};
 
         if (!formData.name) {
-            newErrors.name = 'Name is required.';
+            newErrors.name = 'Full name is required.';
+        } else if (formData.name.length < 2) {
+            newErrors.name = 'Name must be at least 2 characters long.';
+        } else if (formData.name.length > 50) {
+            newErrors.name = 'Name cannot exceed 50 characters.';
+        } else if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+            newErrors.name = 'Name can only contain letters and spaces.';
+        } else if (formData.name.trim().split(' ').length < 2) {
+            newErrors.name = 'Please enter your full name (first and last name).';
         }
 
         if (!formData.email) {
-            newErrors.email = 'Email is required.';
+            newErrors.email = 'Email address is required.';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = 'Invalid email address.';
+            newErrors.email = 'Please enter a valid email address (e.g., user@example.com).';
+        } else if (formData.email.length > 100) {
+            newErrors.email = 'Email address is too long (maximum 100 characters).';
+        } else if (formData.email.includes('..')) {
+            newErrors.email = 'Email address cannot contain consecutive dots.';
         }
 
         if (!formData.address) {
             newErrors.address = 'Address is required.';
         } else if (formData.address.length < 10) {
-            newErrors.address = 'Address must be at least 10 characters.';
+            newErrors.address = 'Address must be at least 10 characters long for a complete address.';
+        } else if (formData.address.length > 200) {
+            newErrors.address = 'Address cannot exceed 200 characters.';
+        } else if (!/[a-zA-Z]/.test(formData.address)) {
+            newErrors.address = 'Address must contain letters, not just numbers.';
+        } else if (formData.address.trim().split(/\s+/).length < 3) {
+            newErrors.address = 'Please provide a complete address (street, city, etc.).';
         }
 
         if (!formData.phoneNumber) {
             newErrors.phoneNumber = 'Phone number is required.';
-        } else if (!/^[+]?[0-9\s-]{7,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
-            newErrors.phoneNumber = 'Invalid phone number format. Must be 7-15 digits.';
+        } else if (formData.phoneNumber.replace(/[\s\-+]/g, '').length < 7) {
+            newErrors.phoneNumber = 'Phone number must be at least 7 digits long.';
+        } else if (formData.phoneNumber.replace(/[\s\-+]/g, '').length > 15) {
+            newErrors.phoneNumber = 'Phone number cannot exceed 15 digits.';
+        } else if (!/^[+]?[0-9\s-]{7,20}$/.test(formData.phoneNumber)) {
+            newErrors.phoneNumber = 'Invalid phone number format. Use only numbers, spaces, hyphens, and + sign.';
+        } else if (!/^\d/.test(formData.phoneNumber.replace(/[\s\-+]/g, ''))) {
+            newErrors.phoneNumber = 'Phone number must start with a digit.';
         }
 
         if (!formData.password) {
             newErrors.password = 'Password is required.';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters.';
+        } else if (formData.password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters long.';
+        } else if (!/(?=.*[a-z])/.test(formData.password)) {
+            newErrors.password = 'Password must contain at least one lowercase letter.';
+        } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+            newErrors.password = 'Password must contain at least one uppercase letter.';
+        } else if (!/(?=.*\d)/.test(formData.password)) {
+            newErrors.password = 'Password must contain at least one number.';
+        } else if (!/(?=.*[@$!%*?&])/.test(formData.password)) {
+            newErrors.password = 'Password must contain at least one special character (@$!%*?&).';
         }
 
         if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Confirm Password is required.';
+            newErrors.confirmPassword = 'Please confirm your password.';
         } else if (formData.confirmPassword !== formData.password) {
-            newErrors.confirmPassword = 'Passwords do not match.';
+            newErrors.confirmPassword = 'Passwords do not match. Please make sure both passwords are identical.';
         }
 
         setErrors(newErrors);
@@ -222,6 +292,35 @@ const Registration = () => {
                                 placeholder="Enter your password"
                             />
                             {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+                            
+                            {/* Password Strength Indicator */}
+                            {formData.password && (
+                                <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">Password requirements:</p>
+                                    <div className="space-y-1">
+                                        <div className={`flex items-center text-xs ${passwordStrength.length ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className="mr-2">{passwordStrength.length ? '✓' : '✗'}</span>
+                                            At least 8 characters
+                                        </div>
+                                        <div className={`flex items-center text-xs ${passwordStrength.lowercase ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className="mr-2">{passwordStrength.lowercase ? '✓' : '✗'}</span>
+                                            One lowercase letter
+                                        </div>
+                                        <div className={`flex items-center text-xs ${passwordStrength.uppercase ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className="mr-2">{passwordStrength.uppercase ? '✓' : '✗'}</span>
+                                            One uppercase letter
+                                        </div>
+                                        <div className={`flex items-center text-xs ${passwordStrength.number ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className="mr-2">{passwordStrength.number ? '✓' : '✗'}</span>
+                                            One number
+                                        </div>
+                                        <div className={`flex items-center text-xs ${passwordStrength.special ? 'text-green-600' : 'text-red-600'}`}>
+                                            <span className="mr-2">{passwordStrength.special ? '✓' : '✗'}</span>
+                                            One special character (@$!%*?&)
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Confirm Password Field */}
